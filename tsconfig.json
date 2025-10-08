@@ -29,6 +29,9 @@
     "examples/**/*",
     "src/__tests__/**/*",
     "**/*.test.ts",
-    "**/*.test.tsx"
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "tests/**/*"
   ]
 }

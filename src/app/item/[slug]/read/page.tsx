@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import type { Item, SyncMap as SyncMapType } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,18 @@ type FullItem = Item & {
   audioTracks?: Array<{ audioUrl: string; durationMs?: number | null; language?: string | null; voice?: string | null }>;
   syncMap?: SyncMapType | null;
 };
+
+declare global {
+  interface Window {
+    parettoNarrator?: {
+      skipMetaIntro: (opts?: { ms?: number; chapterIndex?: number }) => void;
+      hasSkippableIntro?: boolean;
+      chapters?: number;
+    };
+  }
+}
+
+const SKIP_META_EVENT = "paretto:narrator:skip-meta-intro";
 
 async function fetchItem(slug: string): Promise<FullItem | null> {
   const url = new URL(`/api/items?slug=${encodeURIComponent(slug)}&expand=full`, window.location.origin);
@@ -33,10 +45,11 @@ export default function ReadPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { data: session } = useSession();
-  const [showPdf] = useState(true);
+  const [showPdf, setShowPdf] = useState(true);
   const [speed, setSpeed] = useState(1);
   // Minimal dock is always visible (low opacity). We no longer auto-hide fully.
   const [isPaused, setIsPaused] = useState(true);
+  const [showChapters, setShowChapters] = useState(false);
 
   useEffect(() => {
     fetchItem(slug).then(setItem);
@@ -110,61 +123,198 @@ export default function ReadPage() {
   }, [item, syncEnabled, syncOffsetMs]);
 
   const sections = useMemo(() => item?.sections ?? [], [item]);
+
+  const chapterCount = useMemo(() => {
+    if (sections.length > 0) return sections.length;
+    const syncData = item?.syncMap?.data;
+    if (!syncData || !Array.isArray(syncData)) return 0;
+    let maxIndex = -1;
+    const seen = new Set<number>();
+    for (const entry of syncData as Array<{ i?: number }>) {
+      const value = typeof entry?.i === "number" ? entry.i : undefined;
+      if (typeof value !== "number" || Number.isNaN(value)) continue;
+      const index = Math.max(0, Math.trunc(value));
+      seen.add(index);
+      if (index > maxIndex) maxIndex = index;
+    }
+    if (seen.size > 0) return Math.max(seen.size, maxIndex + 1);
+    return maxIndex >= 0 ? maxIndex + 1 : 0;
+  }, [sections.length, item?.syncMap?.data]);
+
+  const chapterCountLabel = useMemo(() => {
+    if (chapterCount === 1) return "1 capitulo";
+    if (chapterCount > 1) return `${chapterCount} capitulos`;
+    return "Capitulos";
+  }, [chapterCount]);
+
   const track = useMemo(() => item?.audioTracks?.[0], [item]);
 
-  if (!item) return <div className="container mx-auto p-6">Carregando…</div>;
+  const syncPoints = useMemo(() => {
+    const syncData = item?.syncMap?.data;
+    if (!syncData || !Array.isArray(syncData)) return [] as Array<{ t: number; i: number; w?: number }>;
+    return (syncData as Array<{ t?: number; i?: number; w?: number }>).map((entry) => ({
+      t: Number(entry.t) || 0,
+      i: Math.max(0, Math.trunc(typeof entry.i === "number" ? entry.i : 0)),
+      w: typeof entry.w === "number" ? Math.trunc(entry.w) : undefined,
+    }));
+  }, [item?.syncMap?.data]);
+
+  const chapterStartsMs = useMemo(() => {
+    if (!chapterCount) return [] as number[];
+    const starts = Array.from({ length: chapterCount }, () => Number.NaN);
+    for (const point of syncPoints) {
+      const index = Math.min(point.i, chapterCount - 1);
+      if (Number.isNaN(starts[index]) || point.t < starts[index]) starts[index] = point.t;
+    }
+    return starts.map((value, index) => (Number.isNaN(value) ? (index === 0 ? 0 : value) : value));
+  }, [chapterCount, syncPoints]);
+
+  const firstMainChapterIndex = useMemo(() => {
+    const normalizeHeading = (heading: string) =>
+      heading.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const isMeta = (heading: string) => {
+      const ascii = normalizeHeading(heading);
+      return /meta|apresentacao|prefacio|sumario|sinopse|sobre|nota|agradecimentos|como usar|introducao/.test(ascii)
+        && !/capitulo|cap\.|cap\s/.test(ascii);
+    };
+    const looksLikeChapter = (heading: string) => {
+      const ascii = normalizeHeading(heading);
+      return /capitulo|cap\.|cap\s|^\s*[ivx]+(\.|$)|\b\d+\b/.test(ascii);
+    };
+    for (let index = 0; index < sections.length; index += 1) {
+      const heading = sections[index]?.heading ?? "";
+      if (!heading) continue;
+      if (!isMeta(heading) && looksLikeChapter(heading)) return index;
+    }
+    if (sections.length > 1) {
+      const firstHeading = sections[0]?.heading ?? "";
+      if (firstHeading && isMeta(firstHeading)) return 1;
+    }
+    return 0;
+  }, [sections]);
+
+  const canSkipIntro = useMemo(() => {
+    if (!chapterStartsMs.length) return false;
+    const target = chapterStartsMs[firstMainChapterIndex];
+    return firstMainChapterIndex > 0 && Number.isFinite(target);
+  }, [chapterStartsMs, firstMainChapterIndex]);
+
+  const jumpToChapterIndex = useCallback(
+    (index: number) => {
+      const ms = chapterStartsMs[index];
+      const audio = audioRef.current;
+      if (!audio || !Number.isFinite(ms)) return false;
+      audio.currentTime = Math.max(0, (ms as number) / 1000);
+      setShowChapters(false);
+      return true;
+    },
+    [chapterStartsMs],
+  );
+
+  const seekToMs = useCallback((ms: number) => {
+    const audio = audioRef.current;
+    if (!audio || !Number.isFinite(ms)) return false;
+    audio.currentTime = Math.max(0, ms / 1000);
+    setShowChapters(false);
+    return true;
+  }, []);
+
+  const skipIntro = useCallback(() => {
+    jumpToChapterIndex(firstMainChapterIndex);
+  }, [firstMainChapterIndex, jumpToChapterIndex]);
+
+  const fmt = useCallback((ms?: number | null) => {
+    const totalSeconds = Math.max(0, Math.floor((Number(ms) || 0) / 1000));
+    const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+    const minutes = Math.floor((totalSeconds / 60) % 60).toString().padStart(2, "0");
+    const hours = Math.floor(totalSeconds / 3600);
+    return hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ ms?: number; chapterIndex?: number }>).detail ?? {};
+      if (typeof detail.ms === "number" && seekToMs(detail.ms)) return;
+      if (typeof detail.chapterIndex === "number" && jumpToChapterIndex(detail.chapterIndex)) return;
+      skipIntro();
+    };
+    window.addEventListener(SKIP_META_EVENT, handler);
+    window.parettoNarrator = {
+      ...(window.parettoNarrator ?? {}),
+      skipMetaIntro: (opts?: { ms?: number; chapterIndex?: number }) => {
+        if (opts?.ms !== undefined && seekToMs(opts.ms)) return;
+        if (opts?.chapterIndex !== undefined && jumpToChapterIndex(opts.chapterIndex)) return;
+        skipIntro();
+      },
+      hasSkippableIntro: canSkipIntro,
+      chapters: chapterCount,
+    };
+    return () => {
+      window.removeEventListener(SKIP_META_EVENT, handler);
+      if (window.parettoNarrator) {
+        delete window.parettoNarrator.skipMetaIntro;
+        delete window.parettoNarrator.hasSkippableIntro;
+        delete window.parettoNarrator.chapters;
+        if (Object.keys(window.parettoNarrator).length === 0) {
+          window.parettoNarrator = undefined;
+        }
+      }
+    };
+  }, [jumpToChapterIndex, seekToMs, skipIntro, canSkipIntro, chapterCount]);
+
+  if (!item) return <div className="container mx-auto p-6">Carregando...</div>;
 
   return (
     <div className="fixed inset-0 w-screen h-screen bg-black">
-      {/* Voltar à biblioteca - touch-friendly on mobile */}
-      <div className="fixed left-3 top-3 z-50 opacity-90 hover:opacity-100">
-        <a href="/library" aria-label="Voltar à biblioteca" title="Voltar à biblioteca">
-          <Button
-            variant="outline"
-            className="rounded-full bg-black/60 text-white border-white/30 shadow-lg p-0 h-11 w-11 flex items-center justify-center"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-        </a>
-      </div>
-      {/* Voltar à biblioteca */}
-      <a href="/library" className="fixed left-3 top-3 z-50 opacity-90 hover:opacity-100">
+      {/* Voltar para a biblioteca */}
+      <a href="/library" className="fixed left-3 top-3 z-50 opacity-90 hover:opacity-100" aria-label="Voltar para a biblioteca" title="Voltar para a biblioteca">
         <Button
           size="sm"
           variant="outline"
-          aria-label="Voltar à biblioteca"
           className="rounded-full bg-black/60 text-white border-white/20 p-0 h-9 w-9 flex items-center justify-center"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
       </a>
-      {/* Optional support chip */}
-      <a href="/plans" className="fixed left-3 bottom-3 z-50 opacity-80 hover:opacity-100">
-        <Button size="sm" variant="outline" className="rounded-full bg-black/60 text-white border-white/20">Apoiar projeto</Button>
-      </a>
-      {/* Hidden audio element (we control via our minimal UI) */}
-      <audio ref={audioRef} src={track?.audioUrl ?? ''} preload="metadata" onContextMenu={(e)=>e.preventDefault()} />
 
-      {/* Full-bleed reader */}
       {showPdf && item?.pdfUrl ? (
         <div className="absolute inset-0 overflow-auto flex items-center justify-center">
-          <div style={{ transform: `scale(${pdfScale})`, transformOrigin: 'center center', width: '100%', height: '100%' }}>
+          <div
+            style={{
+              transform: `scale(${pdfScale})`,
+              transformOrigin: 'center center',
+              width: '100%',
+              height: '100%',
+            }}
+          >
             <object
               data={`/api/item/pdf?slug=${encodeURIComponent(slug)}#toolbar=0&navpanes=0&scrollbar=1`}
               type="application/pdf"
               className="w-full h-full"
+              onError={() => setShowPdf(false)}
             />
           </div>
         </div>
       ) : (
         <div ref={containerRef} className="absolute inset-0 overflow-y-auto">
           <div className={`mx-auto max-w-3xl p-6 text-card-foreground ${readerTheme === 'sepia' ? 'bg-[#F6F0E6] text-[#2B2A28]' : readerTheme === 'light' ? 'bg-white text-black' : 'bg-[#0B0B0F] text-white'}`} style={{ fontSize: `${scale}rem`, lineHeight: 1.9 }}>
-            {sections.map((s, i: number) => (
-              <section key={i} data-sec={i} className="mb-8">
-                {s.heading ? <h2 className="text-lg font-semibold mb-3 heading">{s.heading}</h2> : null}
-                <WordWrapped contentHtml={s.contentHtml ?? ''} secIndex={i} />
-              </section>
-            ))}
+            {sections.length === 0 ? (
+              <div className="py-16 text-center opacity-80">
+                <p>Conteudo indisponivel para este item.</p>
+                <p className="text-sm">Tente alternar para PDF (se existir) ou volte para a biblioteca.</p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] opacity-60">{chapterCountLabel}</div>
+                {sections.map((s, i: number) => (
+                  <section key={i} data-sec={i} className="mb-8">
+                    {s.heading ? <h2 className="text-lg font-semibold mb-3 heading">{s.heading}</h2> : null}
+                    <WordWrapped contentHtml={s.contentHtml ?? ''} secIndex={i} />
+                  </section>
+                ))}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -185,6 +335,28 @@ export default function ReadPage() {
           </Button>
           <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs" aria-label="Voltar 10 segundos" onClick={()=>{ const a=audioRef.current; if(!a) return; a.currentTime = Math.max(0, a.currentTime - 10); }}>-10s</Button>
           <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs" aria-label="Avançar 10 segundos" onClick={()=>{ const a=audioRef.current; if(!a) return; a.currentTime = a.currentTime + 10; }}>+10s</Button>
+          {canSkipIntro && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs"
+              onClick={skipIntro}
+              aria-label="Pular introducao"
+            >
+              Pular intro
+            </Button>
+          )}
+          {chapterCount > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs"
+              onClick={() => setShowChapters((value) => !value)}
+              aria-label="Ver capitulos"
+            >
+              Capitulos ({chapterCount})
+            </Button>
+          )}
           <div className="flex items-center gap-1">
             Vel
             <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2" onClick={()=>{ const a=audioRef.current; if(!a) return; const v=Math.max(0.5, Math.round((a.playbackRate-0.25)*100)/100); a.playbackRate=v; setSpeed(v); }}>-</Button>
@@ -210,8 +382,32 @@ export default function ReadPage() {
           {/* Divider */}
           <div className="mx-1 h-4 sm:h-5 w-px bg-white/30" />
           {/* Mode toggle */}
-          <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs" onClick={()=>{ /* toggle PDF/Text */ }} disabled={!item?.pdfUrl && showPdf}>{showPdf ? 'PDF' : 'TXT'}</Button>
+          <Button
+
+            size="sm"
+
+            variant="outline"
+
+            className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs"
+
+            onClick={() => {
+
+              if (!item?.pdfUrl) return;
+
+              setShowPdf((value) => !value);
+
+            }}
+
+            disabled={!item?.pdfUrl}
+
+          >
+
+            {showPdf ? 'PDF' : 'TXT'}
+
+          </Button>
+
           {/* Zoom controls depend on mode */}
+
           {showPdf ? (
             <div className="flex items-center gap-1">
               Zoom
@@ -231,13 +427,51 @@ export default function ReadPage() {
           {!showPdf && (
             <div className="flex items-center gap-1">
               Cor
-              <Button size="sm" variant={readerTheme==='light'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('light')} aria-label="Tema claro">☀️</Button>
-              <Button size="sm" variant={readerTheme==='sepia'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('sepia')} aria-label="Tema sépia">☕</Button>
-              <Button size="sm" variant={readerTheme==='dark'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('dark')} aria-label="Tema escuro">🌙</Button>
+              <Button size="sm" variant={readerTheme==='light'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('light')} aria-label="Tema claro">CL</Button>
+              <Button size="sm" variant={readerTheme==='sepia'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('sepia')} aria-label="Tema sepia">SP</Button>
+              <Button size="sm" variant={readerTheme==='dark'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('dark')} aria-label="Tema escuro">DK</Button>
             </div>
           )}
         </div>
       </div>
+      {showChapters && chapterCount > 0 && (
+        <div className="fixed z-[60] bottom-16 right-3 w-[min(92vw,420px)] max-h-[60vh] overflow-auto rounded-xl border border-white/15 bg-black/80 text-white shadow-xl backdrop-blur p-2">
+          <div className="flex items-center justify-between px-2 py-1">
+            <div className="text-xs opacity-80">Capitulos e marcacoes
+              <span className="ml-2 text-[10px] uppercase tracking-[0.12em] opacity-70">{chapterCountLabel}</span>
+            </div>
+            <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => setShowChapters(false)}>
+              Fechar
+            </Button>
+          </div>
+          <ul className="divide-y divide-white/10">
+            {Array.from({ length: chapterCount }, (_, index) => {
+              const ms = chapterStartsMs[index];
+              const heading = sections[index]?.heading || `Secao ${index + 1}`;
+              const canJump = Number.isFinite(ms);
+              return (
+                <li key={index} className="flex items-center justify-between gap-3 px-2 py-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm">{heading}</div>
+                    <div className="text-[11px] opacity-70">{canJump ? `-> ${fmt(ms)}` : "sem marcacao"}</div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-[10px]"
+                      disabled={!canJump}
+                      onClick={() => jumpToChapterIndex(index)}
+                    >
+                      Ir
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
@@ -256,5 +490,7 @@ function WordWrapped({ contentHtml, secIndex }: { contentHtml: string; secIndex:
     </p>
   );
 }
+
+
 
 

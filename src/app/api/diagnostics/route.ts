@@ -28,6 +28,17 @@ interface DiagnosticsResponse {
 }
 
 export async function GET(req: Request) {
+  // Protect diagnostics in production: require admin secret header when set
+  const secret =
+    process.env.ADMIN_API_SECRET || process.env.ADMIN_IMPORT_SECRET || "";
+  const isProd = process.env.NODE_ENV === "production";
+  if (isProd && secret) {
+    const hdr = new Headers(req.headers);
+    const provided = hdr.get("x-admin-secret") || hdr.get("x-admin-api-secret");
+    if (provided !== secret) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
   const env = {
     POSTGRES_URL: Boolean(process.env.POSTGRES_URL),
     BETTER_AUTH_SECRET: Boolean(process.env.BETTER_AUTH_SECRET),
@@ -68,8 +79,7 @@ export async function GET(req: Request) {
     dbError = "POSTGRES_URL is not set";
   }
 
-  // Auth route check: we consider the route responding if it returns any HTTP response
-  // for /api/auth/session (status codes in the 2xx-4xx range are acceptable for readiness)
+  // Auth route check: consider responding if /api/auth/get-session returns any HTTP response
   const origin = (() => {
     try {
       return new URL(req.url).origin;
@@ -80,7 +90,7 @@ export async function GET(req: Request) {
 
   let authRouteResponding: boolean | null = null;
   try {
-    const res = await fetch(`${origin}/api/auth/session`, {
+    const res = await fetch(`${origin}/api/auth/get-session`, {
       method: "GET",
       headers: { Accept: "application/json" },
       cache: "no-store",

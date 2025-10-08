@@ -1,0 +1,12 @@
+# Minimal qlty configuration for local checks without network plugins
+project = "agentic-coding-boilerplate"
+
+[issues]
+mode = "comment"
+
+[sources]
+include = ["src/**", "public/**", "scripts/**"]
+exclude = ["node_modules/**", ".next/**", "resumos e audio/**", "backups/**"]
+
+[plugins]
+# Keep default/built-in smells when available; plugin installation is skipped in sandbox

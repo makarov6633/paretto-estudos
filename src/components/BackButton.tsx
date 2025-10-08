@@ -14,7 +14,9 @@ export function BackButton({ className }: { className?: string }) {
         "p-0 h-11 w-11 rounded-full sm:h-8 sm:w-auto sm:px-3",
         "bg-background/70 border border-border/70 backdrop-blur hover:bg-secondary/60",
         className,
-      ].filter(Boolean).join(" ")}
+      ]
+        .filter(Boolean)
+        .join(" ")}
       aria-label="Voltar"
       title="Voltar"
       onClick={() => {

@@ -4,18 +4,38 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "pnpm run db:migrate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "content:unzip": "powershell -NoProfile -Command \"Expand-Archive -Path ./content.zip -DestinationPath ./ -Force\"",
     "content:import": "node scripts/local-import.mjs",
+    "content:gen": "node scripts/generate-items-from-media.mjs",
+    "content:enrich": "node scripts/enrich-items.mjs --apply",
+    "content:dedupe": "node scripts/fix-duplicates-and-media.mjs --apply",
+    "covers:themed": "node scripts/repair-covers.mjs --force-themed",
+    "content:auto": "npm run content:enrich && npm run content:dedupe && npm run covers:themed",
+    "content:ingest": "node scripts/ingest-from-folder.mjs",
+    "titles:normalize": "node --loader ts-node/esm scripts/normalize-titles.mjs || node scripts/normalize-titles.mjs",
+    "covers:gen": "node scripts/generate-covers.mjs",
+    "sync:gen": "node scripts/generate-sync-maps.mjs",
+    "audio:durations": "node scripts/fill-audio-durations.mjs",
+    "sync:align": "python scripts/align_word_sync.py",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:dev": "drizzle-kit push",
-    "db:reset": "drizzle-kit drop && drizzle-kit push"
+    "db:reset": "drizzle-kit drop && drizzle-kit push",
+    "covers:fetch": "node scripts/fetch-covers.mjs",
+    "covers:repair": "node scripts/repair-covers.mjs",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint:css:fix": "stylelint --fix \"src/**/*.css\"",
+    "remove:item": "node scripts/remove-item.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.9",
@@ -30,29 +50,54 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.44.4",
     "lucide-react": "^0.539.0",
-    "next": "15.4.6",
+    "music-metadata": "^11.9.0",
+    "next": "15.5.4",
     "next-themes": "^0.4.6",
+    "pdf-parse": "^1.1.1",
     "pg": "^8.16.3",
     "postgres": "^3.4.7",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-markdown": "^10.1.0",
+    "stripe": "^18.5.0",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "stylelint": "^16",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^20",
     "@types/pg": "^8.15.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.0.5",
+    "@vitest/ui": "^3.0.5",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9",
-    "eslint-config-next": "15.4.6",
+    "eslint-config-next": "15.5.4",
+    "jsdom": "^25.0.1",
     "shadcn": "^3.0.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.0.5"
+  },
+  "overrides": {
+    "esbuild": "0.24.2",
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.24.2"
+    }
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "zod-to-json-schema>zod": "^3.24.1 || ^4"
+      }
+    }
   }
 }

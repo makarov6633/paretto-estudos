@@ -1,12 +1,15 @@
 "use client";
 
+import { useState, type ReactNode } from "react";
+import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import { useChat } from "@ai-sdk/react";
 import { Button } from "@/components/ui/button";
 import { UserProfile } from "@/components/auth/user-profile";
 import { useSession } from "@/lib/auth-client";
-import { useState, type ReactNode } from "react";
-import ReactMarkdown from "react-markdown";
-import type { Components } from "react-markdown";
+import AmbientBackground from "@/components/AmbientBackground";
+import PageHero from "@/components/PageHero";
+import { Card, CardContent } from "@/components/ui/card";
 
 const H1: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = (props) => (
   <h1 className="mt-2 mb-3 text-2xl font-bold" {...props} />
@@ -18,7 +21,7 @@ const H3: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = (props) => (
   <h3 className="mt-2 mb-2 text-lg font-semibold" {...props} />
 );
 const Paragraph: React.FC<React.HTMLAttributes<HTMLParagraphElement>> = (
-  props
+  props,
 ) => <p className="mb-3 leading-7 text-sm" {...props} />;
 const UL: React.FC<React.HTMLAttributes<HTMLUListElement>> = (props) => (
   <ul className="mb-3 ml-5 list-disc space-y-1 text-sm" {...props} />
@@ -30,7 +33,7 @@ const LI: React.FC<React.LiHTMLAttributes<HTMLLIElement>> = (props) => (
   <li className="leading-6" {...props} />
 );
 const Anchor: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> = (
-  props
+  props,
 ) => (
   <a
     className="underline underline-offset-2 text-primary hover:opacity-90"
@@ -40,7 +43,7 @@ const Anchor: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> = (
   />
 );
 const Blockquote: React.FC<React.BlockquoteHTMLAttributes<HTMLElement>> = (
-  props
+  props,
 ) => (
   <blockquote
     className="mb-3 border-l-2 border-border pl-3 text-muted-foreground"
@@ -70,7 +73,7 @@ const HR: React.FC<React.HTMLAttributes<HTMLHRElement>> = (props) => (
   <hr className="my-4 border-border" {...props} />
 );
 const Table: React.FC<React.TableHTMLAttributes<HTMLTableElement>> = (
-  props
+  props,
 ) => (
   <div className="mb-3 overflow-x-auto">
     <table className="w-full border-collapse text-sm" {...props} />
@@ -115,14 +118,14 @@ function renderMessageContent(message: MaybePartsMessage): ReactNode {
   const parts = Array.isArray(message.parts)
     ? message.parts
     : Array.isArray(message.content)
-    ? message.content
-    : [];
+      ? message.content
+      : [];
   return parts.map((p, idx) =>
     p?.type === "text" && p.text ? (
       <ReactMarkdown key={idx} components={markdownComponents}>
         {p.text}
       </ReactMarkdown>
-    ) : null
+    ) : null,
   );
 }
 
@@ -132,76 +135,138 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
 
   if (isPending) {
-    return <div className="container mx-auto px-4 py-12">Loading...</div>;
+    return (
+      <main className="page-shell">
+        <div className="absolute inset-0 -z-30 bg-gradient-to-b from-[color:var(--overlay-strong)] via-[color:var(--overlay-soft)] to-[color:var(--overlay-strong)]" />
+        <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top,rgba(42,199,105,0.18),transparent_70%)]" />
+        <AmbientBackground className="opacity-80" />
+        <div className="relative mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-4">
+          <Card className="surface-card border-border bg-[color:var(--overlay-card)] backdrop-blur-xl w-full">
+            <CardContent className="py-12 text-center text-sm text-muted-foreground">
+              Carregando chat...
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
   }
 
   if (!session) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto">
-          <UserProfile />
+      <main className="page-shell">
+        <div className="absolute inset-0 -z-30 bg-gradient-to-b from-[color:var(--overlay-strong)] via-[color:var(--overlay-soft)] to-[color:var(--overlay-strong)]" />
+        <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top,rgba(42,199,105,0.18),transparent_70%)]" />
+        <AmbientBackground className="opacity-80" />
+        <div className="relative mx-auto w-full max-w-4xl px-4 pb-16 pt-16 sm:px-6 lg:px-8">
+          <PageHero
+            eyebrow="Assistente"
+            title="Entre para conversar com o copiloto Paretto"
+            description="Autentique-se para receber resumos comentados, planos de estudo e respostas em contexto com o seu historico."
+            stats={[
+              { label: "Modo", value: "Premium", helper: "Disponivel para assinantes" },
+              { label: "Contexto", value: "Biblioteca", helper: "Referencias em tempo real" },
+              { label: "Idiomas", value: "PT-BR", helper: "Foco em conteudo local" },
+            ]}
+          />
+          <section className="mt-10">
+            <Card className="surface-card border-border bg-[color:var(--overlay-card)] backdrop-blur-xl">
+              <CardContent className="py-8">
+                <UserProfile />
+              </CardContent>
+            </Card>
+          </section>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6 pb-4 border-b">
-          <h1 className="text-2xl font-bold">AI Chat</h1>
-          <span className="text-sm text-muted-foreground">
-            Welcome, {session.user.name}!
-          </span>
-        </div>
-
-        <div className="min-h-[50vh] overflow-y-auto space-y-4 mb-4">
-          {messages.length === 0 && (
-            <div className="text-center text-muted-foreground">
-              Start a conversation with AI
-            </div>
-          )}
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`p-3 rounded-lg ${
-                message.role === "user"
-                  ? "bg-primary text-primary-foreground ml-auto max-w-[80%]"
-                  : "bg-muted max-w-[80%]"
-              }`}
+    <main className="page-shell">
+      <div className="absolute inset-0 -z-30 bg-gradient-to-b from-[color:var(--overlay-strong)] via-[color:var(--overlay-soft)] to-[color:var(--overlay-strong)]" />
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_top,rgba(42,199,105,0.18),transparent_70%)]" />
+      <AmbientBackground className="opacity-80" />
+      <div className="relative mx-auto w-full max-w-5xl px-4 pb-16 pt-16 sm:px-6 lg:px-8">
+        <PageHero
+          eyebrow="Assistente"
+          title="Converse com o copiloto inspirado nos resumos Paretto"
+          description="Peca roteiros de estudo, revise ideias chaves ou gere checklist de aplicacao. A conversa considera seus resumos recentes." 
+          stats={[
+            { label: "Status", value: status === "streaming" ? "Respondendo" : "Pronto", helper: "Atualiza em tempo real" },
+            { label: "Mensagens", value: `${messages.length}`, helper: "Historico local na sessao" },
+            { label: "Privacidade", value: "Somente voce", helper: "Dados nao sao usados para treino" },
+          ]}
+          actions={
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="rounded-full border-border bg-[color:var(--overlay-soft)] text-foreground hover:bg-[color:var(--overlay-card)]"
             >
-              <div className="text-sm font-medium mb-1">
-                {message.role === "user" ? "You" : "AI"}
-              </div>
-              <div>{renderMessageContent(message as MaybePartsMessage)}</div>
-            </div>
-          ))}
-        </div>
+              <a href="/library">Voltar para biblioteca</a>
+            </Button>
+          }
+        />
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const text = input.trim();
-            if (!text) return;
-            sendMessage({ role: "user", parts: [{ type: "text", text }] });
-            setInput("");
-          }}
-          className="flex gap-2"
-        >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-          <Button
-            type="submit"
-            disabled={!input.trim() || status === "streaming"}
-          >
-            Send
-          </Button>
-        </form>
+        <section className="mt-10">
+          <Card className="surface-card border-border bg-[color:var(--overlay-card)] backdrop-blur-xl">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col gap-4">
+                <div className="max-h-[60vh] min-h-[320px] overflow-y-auto space-y-4 pr-1">
+                  {messages.length === 0 ? (
+                    <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] px-4 py-6 text-center text-sm text-muted-foreground">
+                      Comece perguntando sobre um resumo ou solicite um plano de estudo personalizado.
+                    </div>
+                  ) : (
+                    messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`max-w-full rounded-2xl border border-border px-4 py-3 text-sm shadow-sm sm:max-w-[80%] ${
+                          message.role === "user"
+                            ? "ml-auto bg-emerald-500/10 text-emerald-100"
+                            : "bg-[color:var(--overlay-card)] text-foreground"
+                        }`}
+                      >
+                        <div className="mb-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                          {message.role === "user" ? "Voce" : "AI"}
+                        </div>
+                        <div className="leading-relaxed">
+                          {renderMessageContent(message as MaybePartsMessage)}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const text = input.trim();
+                    if (!text) return;
+                    sendMessage({ role: "user", parts: [{ type: "text", text }] });
+                    setInput("");
+                  }}
+                  className="flex flex-col gap-3 sm:flex-row"
+                >
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Escreva sua pergunta ou pedido"
+                    className="flex-1 rounded-full border border-border bg-[color:var(--overlay-card)] px-4 py-3 text-sm text-foreground placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!input.trim() || status === "streaming"}
+                    className="rounded-full px-6"
+                  >
+                    Enviar
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
+

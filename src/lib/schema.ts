@@ -1,4 +1,12 @@
-import { pgTable, text, timestamp, boolean, integer, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  jsonb,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -98,3 +106,61 @@ export const syncMap = pgTable("sync_map", {
   granularity: text("granularity"), // 'line' | 'word'
   data: jsonb("data"), // WebVTT/JSON parsed structure
 });
+
+// --- Personalization ---
+
+export const userPreference = pgTable("user_preference", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  tag: text("tag").notNull(),
+  weight: integer("weight").notNull().default(0),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export const readingEvent = pgTable("reading_event", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  itemId: text("itemId")
+    .notNull()
+    .references(() => item.id, { onDelete: "cascade" }),
+  event: text("event").notNull(), // 'open' | 'play' | 'finish'
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+// --- Book Requests ---
+export const bookRequest = pgTable("book_request", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  author: text("author"),
+  sourceUrl: text("sourceUrl"),
+  notes: text("notes"),
+  status: text("status").notNull().default("pending"), // 'pending' | 'fulfilled' | 'rejected'
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+// --- Subscriptions ---
+export const subscription = pgTable(
+  "subscription",
+  {
+    id: text("id").primaryKey(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    status: text("status").notNull(), // 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'unpaid'
+    currentPeriodEnd: timestamp("currentPeriodEnd"),
+    stripeCustomerId: text("stripeCustomerId"),
+    stripeSubscriptionId: text("stripeSubscriptionId"),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    userUnique: uniqueIndex("subscription_user_unique").on(table.userId),
+  }),
+);
