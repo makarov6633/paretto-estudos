@@ -101,8 +101,15 @@ export async function POST(req: Request) {
       } catch {}
     }
   } catch (e) {
-    console.error("Stripe webhook error", e);
+    console.error("Stripe webhook processing error:", e);
+    // Log to monitoring service in production (e.g., Sentry)
+    // Still return 200 to Stripe to prevent retries for unrecoverable errors
+    return NextResponse.json(
+      { received: true, error: "Processing error logged" },
+      { status: 200 }
+    );
   }
+
   return NextResponse.json({ received: true });
 }
 

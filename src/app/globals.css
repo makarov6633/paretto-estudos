@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @theme inline {
+  /* Custom breakpoint for extra small devices (phones in portrait) */
+  --breakpoint-xs: 480px;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

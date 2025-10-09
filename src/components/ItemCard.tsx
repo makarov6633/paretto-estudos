@@ -64,14 +64,14 @@ export function ItemCard({ item }: Props) {
     .join(" • ");
 
   return (
-    <Card className="surface-card overflow-hidden group transition-all duration-300 hover:shadow-elevated hover:-translate-y-0.5 focus-within:ring-1 focus-within:ring-ring">
-      <Link href={`/item/${item.slug}/read`} aria-label={`Ler ${item.title}`}>
+    <Card className="surface-card overflow-hidden group transition-all duration-300 hover:shadow-elevated active:scale-[0.98] touch-manipulation focus-within:ring-1 focus-within:ring-ring">
+      <Link href={`/item/${item.slug}/read`} aria-label={`Ler ${item.title}`} className="touch-manipulation">
         <div className="relative aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden cover-card">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={currentSrc}
             alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+            className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03] group-active:scale-[1.01]"
             onError={() => {
               if (fallbacks.length) {
                 const [first, ...rest] = fallbacks;
@@ -84,14 +84,14 @@ export function ItemCard({ item }: Props) {
           />
 
           {(item.hasAudio || item.hasPdf) && (
-            <div className="absolute top-2 right-2 flex items-center gap-1">
+            <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 flex items-center gap-0.5 sm:gap-1">
               {item.hasAudio && (
-                <Badge className="bg-black/70 text-white backdrop-blur px-1.5 py-0 h-5 text-[10px]">
+                <Badge className="bg-black/70 text-white backdrop-blur px-1 sm:px-1.5 py-0 h-4 sm:h-5 text-[9px] sm:text-[10px]">
                   Áudio
                 </Badge>
               )}
               {item.hasPdf && (
-                <Badge className="bg-black/70 text-white backdrop-blur px-1.5 py-0 h-5 text-[10px]">
+                <Badge className="bg-black/70 text-white backdrop-blur px-1 sm:px-1.5 py-0 h-4 sm:h-5 text-[9px] sm:text-[10px]">
                   PDF
                 </Badge>
               )}
@@ -99,30 +99,30 @@ export function ItemCard({ item }: Props) {
           )}
 
           {/* Gradiente inferior para garantir legibilidade do título */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 px-3 pb-2">
-            <div className="text-xs font-semibold tracking-tight text-white line-clamp-2 drop-shadow-sm">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 sm:h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 px-2 sm:px-3 pb-1.5 sm:pb-2">
+            <div className="text-[10px] sm:text-xs font-semibold tracking-tight text-white line-clamp-2 drop-shadow-sm">
               {item.title}
             </div>
           </div>
         </div>
       </Link>
-      <CardHeader className="space-y-1">
-        <h3 className="font-semibold leading-tight line-clamp-2 heading">
+      <CardHeader className="space-y-0.5 sm:space-y-1 p-3 sm:p-4">
+        <h3 className="text-xs sm:text-sm font-semibold leading-tight line-clamp-2 heading">
           {item.title}
         </h3>
-        <p className="text-xs text-muted-foreground line-clamp-1">
+        <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1">
           {item.author}
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
         {item.hasAudio || item.hasPdf ? (
-          <div className="text-xs text-muted-foreground">
+          <div className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
             {minutesText || "Conteúdo otimizado"} - aprenda 95% em 20% do
             tempo
           </div>
         ) : (
-          <Badge variant="secondary">Em produção</Badge>
+          <Badge variant="secondary" className="text-[10px] sm:text-xs">Em produção</Badge>
         )}
       </CardContent>
     </Card>

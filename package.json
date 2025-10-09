@@ -35,7 +35,9 @@
     "covers:repair": "node scripts/repair-covers.mjs",
     "lint:css": "stylelint \"src/**/*.css\"",
     "lint:css:fix": "stylelint --fix \"src/**/*.css\"",
-    "remove:item": "node scripts/remove-item.mjs"
+    "remove:item": "node scripts/remove-item.mjs",
+    "deploy:check": "node scripts/pre-deployment-check.mjs",
+    "security:migrate-media": "node scripts/migrate-media-to-private.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.9",

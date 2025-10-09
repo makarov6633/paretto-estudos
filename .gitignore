@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -11,381 +9,50 @@
 !.yarn/versions
 .pnpm-lock.yaml
 
-# testing
+# Testing
 /coverage
 /.playwright-mcp
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production
 /build
 
-# misc
+# Misc
 .DS_Store
 *.pem
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# Environment files (IMPORTANT: never commit secrets!)
 .env*
+!.env.example
 
-# vercel
+# Vercel
 .vercel
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
-public/media/audio/1984.wav
-public/media/audio/a-estranha-vida-de-nikola-tesla.wav
-public/media/audio/a-influencia-de-heidegger-na-psicologia-existencial-humanista-reorganizado.wav
-public/media/audio/a-mente-de-adolf-hitler-completo-final.wav
-public/media/audio/a-sensacao-de-estar-sendo-observado-padronizado.wav
-public/media/audio/a-sutil-arte-resumo-dissertativo.wav
-public/media/audio/a-teoria-do-amadurecimento-corrigido.wav
-public/media/audio/behave-corrigido.wav
-public/media/audio/brasil-uma-historia.wav
-public/media/audio/capitalism-and-freedom.wav
-public/media/audio/cem-anos-solidao-resumo-95-por-cento-final.wav
-public/media/audio/completo-epigenetica.wav
-public/media/audio/determined-resumo-completo-final.wav
-public/media/audio/e-o-cerebro-criou-o-homem-reorganizado.wav
-public/media/audio/expandido-padronizado-a-estranha-vida-de-nikola-tesla.wav
-public/media/audio/faca-seu-cerebro-trabalhar-para-voce.wav
-public/media/audio/free-to-choose-padronizado.wav
-public/media/audio/freud-fundamentos-clinica-reestruturado.wav
-public/media/audio/freud-interpretacao-sonhos-final.wav
-public/media/audio/gestalt-terapia-fundamentos-epistemologicos-e-influencias-filosoficas.wav
-public/media/audio/gestalt-terapia-fundamentos-reorganizado.wav
-public/media/audio/global-inequality.wav
-public/media/audio/habitos-atomicos-james-clear.wav
-public/media/audio/handbook-psicologia-completo-dissertativo-2.wav
-public/media/audio/john-bowlby-teoria-apego-padronizado.wav
-public/media/audio/manifesto-comunista.wav
-public/media/audio/manual-de-psicopatologia.wav
-public/media/audio/martin-heidegger-psicologia-existencial-resumo-padronizado.wav
-public/media/audio/me-poupe-10-passos-resumo-final.wav
-public/media/audio/microbiologia.wav
-public/media/audio/mulheres-que-amam-demais-padronizado-final.wav
-public/media/audio/o-capital-volume-i-profissional.wav
-public/media/audio/o-capital-volume-i.wav
-public/media/audio/o-cerebro-no-esporte-reestruturado.wav
-public/media/audio/o-eu-e-o-inconsciente-jung-formatado.wav
-public/media/audio/o-homem-e-seus-simbolos-dissertativo-final.wav
-public/media/audio/o-poder-do-habito-resumo-profissional.wav
-public/media/audio/oxford-handbook-psychology.wav
-public/media/audio/pai-rico-pai-pobre-resumo-completo-30-paginas.wav
-public/media/audio/pai-rico-pai-pobre-resumo-completo.wav
-public/media/audio/pai-rico-pai-pobre-resumo-dissertativo.wav
-public/media/audio/pense-e-enriqueca-otimizado.wav
-public/media/audio/plantas-medicinais-viva-mais-e-melhor.wav
-public/media/audio/psicanalise-de-boteco.wav
-public/media/audio/psicodiagnostico-reorganizado.wav
-public/media/audio/psicodiagnostico-resumo-profissional-padronizado.wav
-public/media/audio/psicologia-neurociencias.wav
-public/media/audio/psicopatologia-reorganizada.wav
-public/media/audio/resumo-determined-final-v6.wav
-public/media/audio/resumo-fique-onde-esta.wav
-public/media/audio/resumo-hawking-breve-historia-tempo.wav
-public/media/audio/resumo-o-capital-completo-final.wav
-public/media/audio/stress-and-your-body-sapolsky.wav
-public/media/audio/talvez-voce-deva-conversar-com-alguem-resumo-profissional-expandido.wav
-public/media/audio/teorias-da-personalidade-otimizado.wav
-public/media/audio/teorias-personalidade-padronizado.wav
-public/media/audio/terapia-cognitivo-comportamental-para-iniciantes.wav
-public/media/audio/the-obstacle-is-the-way.wav
-public/media/audio/tornar-se-pessoa-rogers-formatado.wav
-public/media/audio/um-apelo-consciencia-resumo-profissional.wav
-public/media/audio/why-language-models-hallucinate-final.wav
-public/media/covers/1984.jpg
-public/media/covers/a-estranha-vida-de-nikola-tesla.jpg
-public/media/covers/a-estranha-vida-de-nikola-tesla.svg
-public/media/covers/a-influencia-de-heidegger-na-psicologia-existencial-humanista-reorganizado.png
-public/media/covers/a-influencia-de-heidegger-na-psicologia-existencial-humanista-reorganizado.svg
-public/media/covers/a-mente-de-adolf-hitler-completo-final.jpg
-public/media/covers/a-mente-de-adolf-hitler-completo-final.svg
-public/media/covers/a-psicologia-da-mulher-maravilha-need-manus.svg
-public/media/covers/a-sensacao-de-estar-sendo-observado-padronizado.jpg
-public/media/covers/a-sutil-arte-resumo-dissertativo.jpg
-public/media/covers/a-sutil-arte-resumo-dissertativo.png
-public/media/covers/a-teoria-do-amadurecimento-corrigido.jpg
-public/media/covers/behave-corrigido.jpg
-public/media/covers/brasil-uma-historia.jpg
-public/media/covers/capitalism-and-freedom.jpg
-public/media/covers/cem-anos-solidao-resumo-95-por-cento-final.jpg
-public/media/covers/cem-anos-solidao-resumo-95-por-cento-final.png
-public/media/covers/completo-epigenetica.jpg
-public/media/covers/determined-resumo-completo-final.jpg
-public/media/covers/determined-resumo-completo-final.png
-public/media/covers/determined-resumo-completo-final.svg
-public/media/covers/e-o-cerebro-criou-o-homem-reorganizado.jpg
-public/media/covers/expandido-padronizado-a-estranha-vida-de-nikola-tesla.jpg
-public/media/covers/expandido-padronizado-a-estranha-vida-de-nikola-tesla.svg
-public/media/covers/faca-seu-cerebro-trabalhar-para-voce.jpg
-public/media/covers/free-to-choose-padronizado.jpg
-public/media/covers/free-to-choose-padronizado.svg
-public/media/covers/freud-fundamentos-clinica-reestruturado.jpg
-public/media/covers/freud-interpretacao-sonhos-final.jpg
-public/media/covers/freud-interpretacao-sonhos-final.png
-public/media/covers/gestalt-terapia-fundamentos-epistemologicos-e-influencias-filosoficas.jpg
-public/media/covers/gestalt-terapia-fundamentos-reorganizado.jpg
-public/media/covers/global-inequality.jpg
-public/media/covers/habitos-atomicos-james-clear.jpg
-public/media/covers/handbook-psicologia-completo-dissertativo-2.png
-public/media/covers/john-bowlby-teoria-apego-padronizado.jpg
-public/media/covers/john-bowlby-teoria-apego-padronizado.png
-public/media/covers/manifesto-comunista.jpg
-public/media/covers/manual-de-psicopatologia.jpg
-public/media/covers/martin-heidegger-psicologia-existencial-resumo-padronizado.jpg
-public/media/covers/martin-heidegger-psicologia-existencial-resumo-padronizado.png
-public/media/covers/me-poupe-10-passos-resumo-final.jpg
-public/media/covers/me-poupe-10-passos-resumo-final.png
-public/media/covers/me-poupe-10-passos-resumo-final.svg
-public/media/covers/microbiologia.jpg
-public/media/covers/mulheres-que-amam-demais-padronizado-final.jpg
-public/media/covers/mulheres-que-amam-demais-padronizado-final.svg
-public/media/covers/o-capital-volume-i-profissional.png
-public/media/covers/o-capital-volume-i.jpg
-public/media/covers/o-capital-volume-i.png
-public/media/covers/o-cerebro-no-esporte-reestruturado.png
-public/media/covers/o-eu-e-o-inconsciente-jung-formatado.jpg
-public/media/covers/o-eu-e-o-inconsciente-jung-formatado.png
-public/media/covers/o-eu-e-o-inconsciente-jung-formatado.svg
-public/media/covers/o-homem-e-seus-simbolos-dissertativo-final.jpg
-public/media/covers/o-poder-do-habito-resumo-profissional.jpg
-public/media/covers/o-poder-do-habito-resumo-profissional.png
-public/media/covers/oxford-handbook-psychology.jpg
-public/media/covers/pai-rico-pai-pobre-resumo-completo-30-paginas.png
-public/media/covers/pai-rico-pai-pobre-resumo-completo-30-paginas.svg
-public/media/covers/pai-rico-pai-pobre-resumo-completo.jpg
-public/media/covers/pai-rico-pai-pobre-resumo-completo.png
-public/media/covers/pai-rico-pai-pobre-resumo-completo.svg
-public/media/covers/pai-rico-pai-pobre-resumo-dissertativo.jpg
-public/media/covers/pai-rico-pai-pobre-resumo-dissertativo.svg
-public/media/covers/pense-e-enriqueca-otimizado.jpg
-public/media/covers/pense-e-enriqueca-otimizado.png
-public/media/covers/plantas-medicinais-viva-mais-e-melhor.jpg
-public/media/covers/psicanalise-de-boteco.jpg
-public/media/covers/psicanalise-de-boteco.svg
-public/media/covers/psicodiagnostico-reorganizado.jpg
-public/media/covers/psicodiagnostico-resumo-profissional-padronizado.jpg
-public/media/covers/psicologia-neurociencias.jpg
-public/media/covers/psicopatologia-reorganizada.jpg
-public/media/covers/psicopatologia-reorganizada.svg
-public/media/covers/resumo-determined-final-v6.jpg
-public/media/covers/resumo-fique-onde-esta.jpg
-public/media/covers/resumo-fique-onde-esta.png
-public/media/covers/resumo-hawking-breve-historia-tempo.jpg
-public/media/covers/resumo-hawking-breve-historia-tempo.svg
-public/media/covers/resumo-o-capital-completo-final.jpg
-public/media/covers/resumo-o-capital-completo-final.png
-public/media/covers/stress-and-your-body-sapolsky.jpg
-public/media/covers/stress-and-your-body-sapolsky.png
-public/media/covers/stress-and-your-body-sapolsky.svg
-public/media/covers/talvez-voce-deva-conversar-com-alguem-resumo-profissional-expandido.jpg
-public/media/covers/talvez-voce-deva-conversar-com-alguem-resumo-profissional-expandido.png
-public/media/covers/teorias-da-personalidade-otimizado.jpg
-public/media/covers/teorias-personalidade-padronizado.jpg
-public/media/covers/terapia-cognitivo-comportamental-para-iniciantes.jpg
-public/media/covers/terapia-cognitivo-comportamental-para-iniciantes.svg
-public/media/covers/the-obstacle-is-the-way.jpg
-public/media/covers/tornar-se-pessoa-rogers-formatado.jpg
-public/media/covers/tornar-se-pessoa-rogers-formatado.svg
-public/media/covers/um-apelo-consciencia-resumo-profissional.jpg
-public/media/covers/why-language-models-hallucinate-final.jpg
-public/media/pdf/1984.pdf
-public/media/pdf/a-estranha-vida-de-nikola-tesla.pdf
-public/media/pdf/a-influencia-de-heidegger-na-psicologia-existencial-humanista-reorganizado.pdf
-public/media/pdf/a-mente-de-adolf-hitler-completo-final.pdf
-public/media/pdf/a-sensacao-de-estar-sendo-observado-padronizado.pdf
-public/media/pdf/a-sutil-arte-resumo-dissertativo.pdf
-public/media/pdf/a-teoria-do-amadurecimento-corrigido.pdf
-public/media/pdf/behave-corrigido.pdf
-public/media/pdf/brasil-uma-historia.pdf
-public/media/pdf/capitalism-and-freedom.pdf
-public/media/pdf/cem-anos-solidao-resumo-95-por-cento-final.pdf
-public/media/pdf/completo-epigenetica.pdf
-public/media/pdf/determined-resumo-completo-final.pdf
-public/media/pdf/e-o-cerebro-criou-o-homem-reorganizado.pdf
-public/media/pdf/expandido-padronizado-a-estranha-vida-de-nikola-tesla.pdf
-public/media/pdf/faca-seu-cerebro-trabalhar-para-voce.pdf
-public/media/pdf/free-to-choose-padronizado.pdf
-public/media/pdf/freud-fundamentos-clinica-reestruturado.pdf
-public/media/pdf/freud-interpretacao-sonhos-final.pdf
-public/media/pdf/gestalt-terapia-fundamentos-epistemologicos-e-influencias-filosoficas.pdf
-public/media/pdf/gestalt-terapia-fundamentos-reorganizado.pdf
-public/media/pdf/global-inequality.pdf
-public/media/pdf/habitos-atomicos-james-clear.pdf
-public/media/pdf/handbook-psicologia-completo-dissertativo-2.pdf
-public/media/pdf/john-bowlby-teoria-apego-padronizado.pdf
-public/media/pdf/manifesto-comunista.pdf
-public/media/pdf/manual-de-psicopatologia.pdf
-public/media/pdf/martin-heidegger-psicologia-existencial-resumo-padronizado.pdf
-public/media/pdf/me-poupe-10-passos-resumo-final.pdf
-public/media/pdf/microbiologia.pdf
-public/media/pdf/mulheres-que-amam-demais-padronizado-final.pdf
-public/media/pdf/o-capital-volume-i-profissional.pdf
-public/media/pdf/o-capital-volume-i.pdf
-public/media/pdf/o-cerebro-no-esporte-reestruturado.pdf
-public/media/pdf/o-eu-e-o-inconsciente-jung-formatado.pdf
-public/media/pdf/o-homem-e-seus-simbolos-dissertativo-final.pdf
-public/media/pdf/o-poder-do-habito-resumo-profissional.pdf
-public/media/pdf/oxford-handbook-psychology.pdf
-public/media/pdf/pai-rico-pai-pobre-resumo-completo-30-paginas.pdf
-public/media/pdf/pai-rico-pai-pobre-resumo-completo.pdf
-public/media/pdf/pai-rico-pai-pobre-resumo-dissertativo.pdf
-public/media/pdf/pense-e-enriqueca-otimizado.pdf
-public/media/pdf/plantas-medicinais-viva-mais-e-melhor.pdf
-public/media/pdf/psicanalise-de-boteco.pdf
-public/media/pdf/psicodiagnostico-reorganizado.pdf
-public/media/pdf/psicodiagnostico-resumo-profissional-padronizado.pdf
-public/media/pdf/psicologia-neurociencias.pdf
-public/media/pdf/psicopatologia-reorganizada.pdf
-public/media/pdf/resumo-determined-final-v6.pdf
-public/media/pdf/resumo-fique-onde-esta.pdf
-public/media/pdf/resumo-hawking-breve-historia-tempo.pdf
-public/media/pdf/resumo-o-capital-completo-final.pdf
-public/media/pdf/stress-and-your-body-sapolsky.pdf
-public/media/pdf/talvez-voce-deva-conversar-com-alguem-resumo-profissional-expandido.pdf
-public/media/pdf/teorias-da-personalidade-otimizado.pdf
-public/media/pdf/teorias-personalidade-padronizado.pdf
-public/media/pdf/terapia-cognitivo-comportamental-para-iniciantes.pdf
-public/media/pdf/the-obstacle-is-the-way.pdf
-public/media/pdf/tornar-se-pessoa-rogers-formatado.pdf
-public/media/pdf/um-apelo-consciencia-resumo-profissional.pdf
-public/media/pdf/why-language-models-hallucinate-final.pdf
-resumos e audio/A_Influencia_de_Heidegger_na_Psicologia_Existencial-Humanista_REORGANIZADO.pdf
-resumos e audio/A_Influencia_de_Heidegger_na_Psicologia_Existencial-Humanista_REORGANIZADO.wav
-resumos e audio/A_Mente_de_Adolf_Hitler_COMPLETO_FINAL.pdf
-resumos e audio/A_Mente_de_Adolf_Hitler_COMPLETO_FINAL.wav
-resumos e audio/A_Sensacao_de_Estar_Sendo_Observado_Padronizado.pdf
-resumos e audio/A_Sensacao_de_Estar_Sendo_Observado_Padronizado.wav
-resumos e audio/a_sutil_arte_resumo_dissertativo.pdf
-resumos e audio/a_sutil_arte_resumo_dissertativo.wav
-resumos e audio/A_Teoria_do_Amadurecimento_Corrigido.pdf
-resumos e audio/A_Teoria_do_Amadurecimento_Corrigido.wav
-resumos e audio/cem_anos_solidao_resumo_95_por_cento_final.pdf
-resumos e audio/cem_anos_solidao_resumo_95_por_cento_final.wav
-resumos e audio/determined_resumo_completo_final.pdf
-resumos e audio/determined_resumo_completo_final.wav
-resumos e audio/E_o_Cerebro_Criou_o_Homem_Reorganizado.pdf
-resumos e audio/E_o_Cerebro_Criou_o_Homem_Reorganizado.wav
-resumos e audio/freud_fundamentos_clinica_reestruturado.pdf
-resumos e audio/freud_fundamentos_clinica_reestruturado.wav
-resumos e audio/freud_interpretacao_sonhos_final.pdf
-resumos e audio/freud_interpretacao_sonhos_final.wav
-resumos e audio/Gestalt_Terapia_Fundamentos_Reorganizado.pdf
-resumos e audio/Gestalt_Terapia_Fundamentos_Reorganizado.wav
-resumos e audio/Habitos_Atomicos_James_Clear.pdf
-resumos e audio/Habitos_Atomicos_James_Clear.wav
-resumos e audio/Handbook_Psicologia_Completo_Dissertativo (2).pdf
-resumos e audio/Handbook_Psicologia_Completo_Dissertativo (2).wav
-resumos e audio/john_bowlby_teoria_apego_padronizado.pdf
-resumos e audio/john_bowlby_teoria_apego_padronizado.wav
-resumos e audio/martin_heidegger_psicologia_existencial_resumo_padronizado.pdf
-resumos e audio/martin_heidegger_psicologia_existencial_resumo_padronizado.wav
-resumos e audio/Me_Poupe_10_Passos_Resumo_Final.pdf
-resumos e audio/Me_Poupe_10_Passos_Resumo_Final.wav
-resumos e audio/Mulheres_que_Amam_Demais_Padronizado_FINAL.pdf
-resumos e audio/Mulheres_que_Amam_Demais_Padronizado_FINAL.wav
-resumos e audio/novos resumos_Resumo_Completo_1984.pdf
-resumos e audio/novos resumos_Resumo_Completo_1984.wav
-resumos e audio/novos resumos_Resumo_Completo_A_Estranha_Ordem_das_Coisas.pdf
-resumos e audio/novos resumos_Resumo_Completo_Brasil_Uma_Historia.pdf
-resumos e audio/novos resumos_Resumo_Completo_Brasil_Uma_Historia.wav
-resumos e audio/novos resumos_Resumo_Completo_Capitalism_and_Freedom.pdf
-resumos e audio/novos resumos_Resumo_Completo_Capitalism_and_Freedom.wav
-resumos e audio/novos resumos_Resumo_Completo_Free_to_Choose_padronizado.pdf
-resumos e audio/novos resumos_Resumo_Completo_Free_to_Choose_padronizado.wav
-resumos e audio/novos resumos_Resumo_Completo_Mindset.pdf
-resumos e audio/novos resumos_Resumo_Completo_O_Erro_de_Descartes.pdf
-resumos e audio/novos resumos_Resumo_Completo_Plantas_Medicinais_Viva_Mais_e_Melhor.pdf
-resumos e audio/novos resumos_Resumo_Completo_Plantas_Medicinais_Viva_Mais_e_Melhor.wav
-resumos e audio/novos resumos_Resumo_Completo_Psicanalise_de_Boteco.pdf
-resumos e audio/novos resumos_Resumo_Completo_Psicanalise_de_Boteco.wav
-resumos e audio/novos resumos_Resumo_Completo_Sentir_e_Saber.pdf
-resumos e audio/novos resumos_Resumo_Completo_The_Obstacle_Is_the_Way.pdf
-resumos e audio/novos resumos_Resumo_Completo_The_Obstacle_Is_the_Way.wav
-resumos e audio/o_cerebro_no_esporte_reestruturado.pdf
-resumos e audio/o_cerebro_no_esporte_reestruturado.wav
-resumos e audio/o_eu_e_o_inconsciente_jung_formatado.pdf
-resumos e audio/o_eu_e_o_inconsciente_jung_formatado.wav
-resumos e audio/O_Homem_e_Seus_Simbolos_Dissertativo_Final.pdf
-resumos e audio/O_Homem_e_Seus_Simbolos_Dissertativo_Final.wav
-resumos e audio/o_poder_do_habito_resumo_profissional.pdf
-resumos e audio/o_poder_do_habito_resumo_profissional.wav
-resumos e audio/pai_rico_pai_pobre_resumo_dissertativo.pdf
-resumos e audio/pai_rico_pai_pobre_resumo_dissertativo.wav
-resumos e audio/Pai-Rico-Pai-Pobre-Resumo-Completo-30-Paginas.pdf
-resumos e audio/Pai-Rico-Pai-Pobre-Resumo-Completo-30-Paginas.wav
-resumos e audio/Pai-Rico-Pai-Pobre-Resumo-Completo.pdf
-resumos e audio/Pai-Rico-Pai-Pobre-Resumo-Completo.wav
-resumos e audio/pense_e_enriqueca_otimizado.pdf
-resumos e audio/pense_e_enriqueca_otimizado.wav
-resumos e audio/psicodiagnostico_reorganizado.pdf
-resumos e audio/psicodiagnostico_reorganizado.wav
-resumos e audio/psicodiagnostico_resumo_profissional_padronizado.pdf
-resumos e audio/psicodiagnostico_resumo_profissional_padronizado.wav
-resumos e audio/psicopatologia_reorganizada.pdf
-resumos e audio/psicopatologia_reorganizada.wav
-resumos e audio/Resumo - A Estranha Vida de Nikola Tesla.pdf
-resumos e audio/Resumo - A Estranha Vida de Nikola Tesla.wav
-resumos e audio/Resumo Completo - Epigenética.pdf
-resumos e audio/Resumo Completo - Epigenética.wav
-resumos e audio/Resumo Expandido Padronizado - A Estranha Vida de Nikola Tesla.pdf
-resumos e audio/Resumo Expandido Padronizado - A Estranha Vida de Nikola Tesla.wav
-resumos e audio/Resumo_Completo_Behave_CORRIGIDO.pdf
-resumos e audio/Resumo_Completo_Behave_CORRIGIDO.wav
-resumos e audio/Resumo_Completo_Brasil_Uma_Historia.pdf
-resumos e audio/Resumo_Completo_Brasil_Uma_Historia.wav
-resumos e audio/Resumo_Completo_Cerebro_Emocional.pdf
-resumos e audio/Resumo_Completo_Gestalt_Terapia_Fundamentos_Epistemologicos_e_Influencias_Filosoficas.pdf
-resumos e audio/Resumo_Completo_Gestalt_Terapia_Fundamentos_Epistemologicos_e_Influencias_Filosoficas.wav
-resumos e audio/Resumo_Completo_Global_Inequality.pdf
-resumos e audio/Resumo_Completo_Global_Inequality.wav
-resumos e audio/Resumo_Completo_Manifesto_Comunista.pdf
-resumos e audio/Resumo_Completo_Manifesto_Comunista.wav
-resumos e audio/Resumo_Completo_Manual_de_Psicopatologia.pdf
-resumos e audio/Resumo_Completo_Manual_de_Psicopatologia.wav
-resumos e audio/Resumo_Completo_Microbiologia.pdf
-resumos e audio/Resumo_Completo_Microbiologia.wav
-resumos e audio/Resumo_Completo_O_Capital_Volume_I_Profissional.pdf
-resumos e audio/Resumo_Completo_O_Capital_Volume_I_Profissional.wav
-resumos e audio/Resumo_Completo_O_Capital_Volume_I.pdf
-resumos e audio/Resumo_Completo_O_Capital_Volume_I.wav
-resumos e audio/Resumo_Completo_O_Livro_da_Consciencia.pdf
-resumos e audio/Resumo_Completo_Oxford_Handbook_Psychology.pdf
-resumos e audio/Resumo_Completo_Oxford_Handbook_Psychology.wav
-resumos e audio/Resumo_Completo_Psicologia_Neurociencias.pdf
-resumos e audio/Resumo_Completo_Psicologia_Neurociencias.wav
-resumos e audio/Resumo_Completo_Stress_and_Your_Body_Sapolsky.pdf
-resumos e audio/Resumo_Completo_Stress_and_Your_Body_Sapolsky.wav
-resumos e audio/Resumo_Completo_Why_Language_Models_Hallucinate_Final.pdf
-resumos e audio/Resumo_Completo_Why_Language_Models_Hallucinate_Final.wav
-resumos e audio/Resumo_Determined_FINAL_v6.pdf
-resumos e audio/Resumo_Determined_FINAL_v6.wav
-resumos e audio/Resumo_Expandido_Faca_Seu_Cerebro_Trabalhar_Para_Voce.pdf
-resumos e audio/Resumo_Expandido_Faca_Seu_Cerebro_Trabalhar_Para_Voce.wav
-resumos e audio/resumo_fique_onde_esta.pdf
-resumos e audio/resumo_fique_onde_esta.wav
-resumos e audio/resumo_hawking_breve_historia_tempo.pdf
-resumos e audio/resumo_hawking_breve_historia_tempo.wav
-resumos e audio/Resumo_O_Capital_Completo_Final.pdf
-resumos e audio/Resumo_O_Capital_Completo_Final.wav
-resumos e audio/Talvez_Voce_Deva_Conversar_com_Alguem_Resumo_Profissional_Expandido.pdf
-resumos e audio/Talvez_Voce_Deva_Conversar_com_Alguem_Resumo_Profissional_Expandido.wav
-resumos e audio/Teorias_da_Personalidade_OTIMIZADO.pdf
-resumos e audio/Teorias_da_Personalidade_OTIMIZADO.wav
-resumos e audio/teorias_personalidade_padronizado.pdf
-resumos e audio/teorias_personalidade_padronizado.wav
-resumos e audio/Terapia_Cognitivo_Comportamental_para_Iniciantes.pdf
-resumos e audio/Terapia_Cognitivo_Comportamental_para_Iniciantes.wav
-resumos e audio/tornar_se_pessoa_rogers_formatado.pdf
-resumos e audio/tornar_se_pessoa_rogers_formatado.wav
-resumos e audio/um_apelo_consciencia_resumo_profissional.pdf
-resumos e audio/um_apelo_consciencia_resumo_profissional.wav
+
+# Media files (large binaries)
+public/media/audio/*.wav
+public/media/pdf/*.pdf
+private/audio/*.wav
+private/pdf/*.pdf
+
+# Temporary/working directories
+resumos e audio/
+backups/
+duplicate-report.txt
+items.json
+
+# IDE
+.vscode/
+.idea/

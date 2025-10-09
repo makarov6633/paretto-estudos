@@ -18,7 +18,6 @@ async function ItemsList({ searchParams }: { searchParams: SearchParams }) {
       ? process.env.NEXT_PUBLIC_BASE_URL
       : `${proto}://${host}`;
   const url = new URL("/api/items", origin);
-  url.searchParams.set("limit", "60");
   if (q) url.searchParams.set("q", q);
   if (tag) url.searchParams.set("tag", tag);
   if (hasAudio === "1") url.searchParams.set("hasAudio", "1");
@@ -47,25 +46,25 @@ export default async function LibraryPage({
 
   return (
     <main className="page-shell">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-end">
           <form className="flex-1">
             <input
               type="text"
               name="q"
               defaultValue={typeof sp.q === "string" ? sp.q : ""}
-              placeholder="Encontre seu proximo titulo"
-              className="h-11 w-full rounded-md border border-border bg-card px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              placeholder="Encontre seu próximo título"
+              className="h-10 sm:h-11 w-full rounded-md border border-border bg-card px-3 sm:px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary touch-manipulation"
             />
           </form>
-          <div className="flex items-center gap-2 text-sm">
-            <a href="/library?read=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)]">
+          <div className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto pb-1">
+            <a href="/library?read=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
               Leitura
             </a>
-            <a href="/library?audio=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)]">
-              Audio
+            <a href="/library?audio=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
+              Áudio
             </a>
-            <a href="/library" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)]">
+            <a href="/library" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
               Todos
             </a>
           </div>

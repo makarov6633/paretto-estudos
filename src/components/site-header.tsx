@@ -19,18 +19,18 @@ export function SiteHeader() {
   const isHome = pathname === "/" || pathname === "" || pathname == null;
   return (
     <header className="sticky top-0 z-40 border-b bg-background/70 supports-[backdrop-filter]:bg-background/60 backdrop-blur">
-      <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-4">
-        <div className="flex items-center gap-3">
+      <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {!isHome && <BackButton />}
-          <h1 className="heading text-2xl font-bold tracking-tight">
+          <h1 className="heading text-base sm:text-xl md:text-2xl font-bold tracking-tight min-w-0">
             <Link
               href="/"
-              className="flex items-center gap-2 no-underline text-foreground transition-colors hover:text-primary"
+              className="flex items-center gap-1.5 sm:gap-2 no-underline text-foreground transition-colors hover:text-primary touch-manipulation min-w-0"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/15 shadow-sm">
-                <Sparkles className="h-5 w-5 text-emerald-300" />
+              <div className="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-emerald-500/15 shadow-sm shrink-0">
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-300" />
               </div>
-              <span className="bg-gradient-to-r from-emerald-200 via-emerald-300 to-amber-300 bg-clip-text text-transparent font-extrabold">
+              <span className="bg-gradient-to-r from-emerald-200 via-emerald-300 to-amber-300 bg-clip-text text-transparent font-extrabold truncate">
                 Paretto Estudos
               </span>
             </Link>
@@ -38,7 +38,7 @@ export function SiteHeader() {
         </div>
 
         {/* Desktop navigation */}
-        <nav className="hidden items-center gap-6 text-sm md:flex">
+        <nav className="hidden items-center gap-5 text-sm md:flex">
           <Link
             href="/library"
             prefetch
@@ -60,16 +60,17 @@ export function SiteHeader() {
         </nav>
 
         {/* Right side / Mobile menu */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <UserProfile />
           <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" className="md:hidden">
+              <Button size="sm" variant="outline" className="md:hidden h-8 w-8 sm:h-9 sm:w-9 p-0 touch-manipulation">
                 <Menu className="h-4 w-4" />
+                <span className="sr-only">Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
                 <Link href="/library" prefetch className="w-full no-underline">
                   Biblioteca

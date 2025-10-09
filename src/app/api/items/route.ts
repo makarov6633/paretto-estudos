@@ -13,6 +13,7 @@ import {
   type SQLWrapper,
 } from "drizzle-orm";
 import { computeEtag } from "@/lib/http";
+import { getUserIdFromRequest, checkUserAccess } from "@/lib/access-control";
 
 // Pequena correção baseada em padrão para títulos específicos
 function fixTitle(title: string): string {
@@ -40,7 +41,7 @@ export async function GET(req: Request) {
     const hasAudio = searchParams.get("hasAudio");
     const hasPdf = searchParams.get("hasPdf");
     const tag = searchParams.get("tag");
-    const limit = Number(searchParams.get("limit") ?? 24);
+    const limit = Number(searchParams.get("limit") ?? 1000);
     const page = Number(searchParams.get("page") ?? 1);
     const offset = (page - 1) * limit;
     const expand = searchParams.get("expand");
@@ -64,6 +65,25 @@ export async function GET(req: Request) {
 
     const whereClauses: SQLWrapper[] = [];
     if (slug) {
+      // For full content expansion with sections/audio, enforce access control
+      if (expand === "full" || expand === "tracks") {
+        const userId = await getUserIdFromRequest(req);
+        if (!userId) {
+          return NextResponse.json(
+            { error: 'Authentication required' },
+            { status: 401 }
+          );
+        }
+
+        const access = await checkUserAccess(userId);
+        if (!access.allowed) {
+          return NextResponse.json(
+            { error: 'Access denied', reason: access.reason, remainingFree: access.remainingFree },
+            { status: access.reason === 'limit' ? 402 : 403 }
+          );
+        }
+      }
+
       const rows = await db
         .select()
         .from(item)

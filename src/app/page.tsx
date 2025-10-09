@@ -100,82 +100,81 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background/80" />
       </div>
 
-      <header className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+      <header className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 pt-4 sm:pt-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs sm:text-sm tracking-tight text-muted-foreground">
+            <span className="text-[10px] xs:text-xs sm:text-sm tracking-tight text-muted-foreground">
               LOCAL <span className="tabular-nums">{now}</span>
             </span>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-muted-foreground">
             <GripHorizontal className="w-4 h-4" />
           </div>
-          {/* contato removido conforme solicitação */}
         </div>
       </header>
 
-      <section id="hero" className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="relative mt-10 sm:mt-16">
+      <section id="hero" className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+        <div className="relative mt-6 sm:mt-10 md:mt-16">
           <h1 className="leading-none tracking-tight text-white select-none">
-            <span className="block text-[22vw] md:text-[16vw] xl:text-[12vw] 2xl:text-[10vw] font-extrabold">
+            <span className="block text-[20vw] sm:text-[18vw] md:text-[16vw] xl:text-[12vw] 2xl:text-[10vw] font-extrabold">
               <span className="text-shadow-hero">PARETTO</span>
             </span>
           </h1>
-          <p className="mt-3 text-muted-foreground max-w-2xl">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
             Resumos originais e fiéis: preservamos as ideias e a estrutura do
             autor, com linguagem clara e exemplos práticos. No mínimo 20% da
             extensão para garantir profundidade e compreensão real.
           </p>
-          <div className="mt-6 flex items-center gap-3">
+          <div className="mt-5 sm:mt-6 flex flex-col xs:flex-row items-stretch xs:items-center gap-2.5 sm:gap-3">
             <Link
               href="/requests"
-              className="no-underline inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium tracking-tight text-white bg-emerald-500/90 hover:bg-emerald-500"
+              className="no-underline inline-flex items-center justify-center gap-2 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-medium tracking-tight text-white bg-emerald-500/90 hover:bg-emerald-500 transition-colors touch-manipulation"
             >
               Pedir resumo 20/95
             </Link>
             <Link
               href="/library"
-              className="no-underline inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium tracking-tight text-foreground bg-[color:var(--overlay-card)] transition-colors hover:bg-[color:var(--overlay-soft)]"
+              className="no-underline inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-medium tracking-tight text-foreground bg-[color:var(--overlay-card)] transition-colors hover:bg-[color:var(--overlay-soft)] touch-manipulation"
             >
               Ver catálogo
             </Link>
           </div>
         </div>
 
-        <div className="mt-6 sm:mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          <div className="pt-5">
-            <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-emerald-400 mt-0.5" />
+        <div className="mt-5 sm:mt-6 md:mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-8">
+          <div className="pt-3 sm:pt-5">
+            <div className="flex items-start gap-2.5 sm:gap-3">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground mt-1">Sudeste · GMT</p>
-                <p className="text-sm font-medium text-foreground/90 tracking-tight">
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">Sudeste · GMT</p>
+                <p className="text-xs sm:text-sm font-medium text-foreground/90 tracking-tight">
                   Base em Rio de Janeiro, Brasil
                 </p>
               </div>
             </div>
           </div>
-          <div className="pt-5">
-            <div className="flex items-start gap-3">
-              <Globe2 className="w-5 h-5 text-cyan-400 mt-0.5" />
+          <div className="pt-3 sm:pt-5">
+            <div className="flex items-start gap-2.5 sm:gap-3">
+              <Globe2 className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium tracking-tight text-foreground/90">
+                <p className="text-xs sm:text-sm font-medium tracking-tight text-foreground/90">
                   Colaboração Global
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                   Projetos remotos · Worldwide
                 </p>
               </div>
             </div>
           </div>
-          <div className="pt-5">
-            <div className="flex items-start gap-3">
-              <GraduationCap className="w-5 h-5 text-indigo-400 mt-0.5" />
+          <div className="pt-3 sm:pt-5 sm:col-span-2 md:col-span-1">
+            <div className="flex items-start gap-2.5 sm:gap-3">
+              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium tracking-tight text-foreground/90">
+                <p className="text-xs sm:text-sm font-medium tracking-tight text-foreground/90">
                   Resumos Profissionais 2095
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
                   20% do tamanho · 95% do conteúdo
                 </p>
               </div>
@@ -183,8 +182,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-10 sm:mt-14">
-          <div className="relative overflow-hidden rounded-2xl bg-[color:var(--overlay-card)]">
+        <div className="mt-6 sm:mt-10 md:mt-14">
+          <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[color:var(--overlay-card)]">
             <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/30 via-transparent to-transparent mix-blend-screen pointer-events-none" />
             {featureImage ? (
               <Image
@@ -192,29 +191,30 @@ export default function Home() {
                 alt="Sistema de resumos com IA"
                 width={1600}
                 height={900}
-                className="w-full h-[52vh] sm:h-[60vh] object-cover"
+                className="w-full h-[40vh] sm:h-[52vh] md:h-[60vh] object-cover"
               />
             ) : (
-              <div className="w-full h-[52vh] sm:h-[60vh] bg-gradient-to-br from-neutral-800 to-neutral-700" />
+              <div className="w-full h-[40vh] sm:h-[52vh] md:h-[60vh] bg-gradient-to-br from-neutral-800 to-neutral-700" />
             )}
           </div>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-14 sm:mt-20">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl sm:text-2xl tracking-tight font-semibold text-white">
+      <section className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mt-10 sm:mt-14 md:mt-20">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl tracking-tight font-semibold text-white">
             Recursos do Sistema
           </h2>
           <Link
             href="#"
-            className="no-underline text-sm text-muted-foreground hover:text-white inline-flex items-center gap-2"
+            className="no-underline text-xs sm:text-sm text-muted-foreground hover:text-white inline-flex items-center gap-1.5 sm:gap-2"
           >
-            <span>Ver todos</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <span className="hidden xs:inline">Ver todos</span>
+            <span className="xs:hidden">Ver</span>
+            <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
           <article className="group rounded-xl overflow-hidden bg-[color:var(--overlay-card)] hover:bg-[color:var(--overlay-soft)] transition">
             <div className="relative aspect-[16/10]">
               <Image
@@ -290,13 +290,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="catalogo" className="max-w-7xl mx-auto px-4 py-10">
-        <div className="flex items-end justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl font-semibold">
+      <section id="catalogo" className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-8 sm:py-10">
+        <div className="flex items-end justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl md:text-3xl font-semibold">
             Recomendados para você
           </h2>
           <Link
-            className="no-underline text-sm text-muted-foreground hover:text-white"
+            className="no-underline text-xs sm:text-sm text-muted-foreground hover:text-white"
             href="/library"
             onClick={(e) => {
               e.preventDefault();
@@ -306,7 +306,7 @@ export default function Home() {
             Ver todos
           </Link>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
           {recLoading && (
             <div className="text-sm text-muted-foreground">Carregando…</div>
           )}
@@ -317,17 +317,17 @@ export default function Home() {
 
       <section
         id="services"
-        className="max-w-7xl mx-auto px-4 sm:px-6 mt-14 sm:mt-20"
+        className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mt-10 sm:mt-14 md:mt-20"
       >
-        <div className="overflow-hidden bg-[color:var(--overlay-card)] rounded-2xl">
-          <div className="flex items-end justify-between p-6 border-b border-border">
-            <h2 className="text-2xl sm:text-3xl tracking-tight font-semibold text-white">
+        <div className="overflow-hidden bg-[color:var(--overlay-card)] rounded-xl sm:rounded-2xl">
+          <div className="flex items-end justify-between p-4 sm:p-6 border-b border-border">
+            <h2 className="text-lg sm:text-2xl md:text-3xl tracking-tight font-semibold text-white">
               Serviços
             </h2>
             <div className="hidden sm:flex items-center gap-2">
               <Link
                 href="#"
-                className="no-underline inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium tracking-tight text-white bg-[color:var(--overlay-soft)] hover:bg-white/20"
+                className="no-underline inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium tracking-tight text-white bg-[color:var(--overlay-soft)] hover:bg-white/20 touch-manipulation"
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span>Apresentação</span>
@@ -335,30 +335,30 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-8 border-b border-border">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+          <div className="p-4 sm:p-6 md:p-8 border-b border-border">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-start">
               <div className="md:col-span-1">
-                <div className="text-3xl sm:text-4xl font-medium tracking-tight text-white/70 tabular-nums">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-white/70 tabular-nums">
                   1
                 </div>
               </div>
               <div className="md:col-span-8">
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400" />{" "}
+                <ul className="space-y-1.5 sm:space-y-2">
+                  <li className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400 shrink-0" />{" "}
                     Leitura e compreensão semântica com IA
                   </li>
-                  <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400" />{" "}
+                  <li className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400 shrink-0" />{" "}
                     Extração de ideias‑chave e evidências
                   </li>
-                  <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400" />{" "}
+                  <li className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400 shrink-0" />{" "}
                     Síntese 2095: 20% do tamanho, 95% do conteúdo
                   </li>
                 </ul>
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="aspect-[4/3] w-24 sm:w-28 rounded-md overflow-hidden">
+                <div className="mt-3 sm:mt-4 flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 sm:pb-0">
+                  <div className="aspect-[4/3] w-20 sm:w-24 md:w-28 rounded-md overflow-hidden shrink-0">
                     <Image
                       src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop"
                       alt="Leitura inteligente"

@@ -49,9 +49,13 @@ export function middleware(req: NextRequest) {
       ? "chat"
       : path.startsWith("/api/takedown")
         ? "takedown"
-        : path.startsWith("/api/")
-          ? "api"
-          : "page";
+        : path.startsWith("/api/access/check")
+          ? "access"
+          : path.startsWith("/api/telemetry")
+            ? "telemetry"
+            : path.startsWith("/api/")
+              ? "api"
+              : "page";
 
   const key = `${ip}:${group}`;
   const limit =
@@ -61,9 +65,13 @@ export function middleware(req: NextRequest) {
         ? RATE_LIMITS.CHAT
         : group === "takedown"
           ? RATE_LIMITS.TAKEDOWN
-          : group === "api"
-            ? RATE_LIMITS.API
-            : RATE_LIMITS.PAGE;
+          : group === "access"
+            ? 10 // 10 access checks per minute
+            : group === "telemetry"
+              ? 20 // 20 telemetry events per minute
+              : group === "api"
+                ? RATE_LIMITS.API
+                : RATE_LIMITS.PAGE;
 
   const { ok, remaining, reset } = allow(key, limit);
   if (!ok) {
