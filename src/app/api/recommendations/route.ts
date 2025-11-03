@@ -49,10 +49,8 @@ export async function GET(req: Request) {
           title: item.title,
           author: item.author,
           coverImageUrl: item.coverImageUrl,
-          hasAudio: item.hasAudio,
           hasPdf: item.hasPdf,
           readingMinutes: item.readingMinutes,
-          audioMinutes: item.audioMinutes,
         })
         .from(item)
         .orderBy(desc(item.createdAt))
@@ -65,10 +63,8 @@ export async function GET(req: Request) {
             title: string;
             author: string;
             coverImageUrl: string | null;
-            hasAudio: boolean;
             hasPdf: boolean;
             readingMinutes: number | null;
-            audioMinutes: number | null;
           }[],
         ),
       );
@@ -87,10 +83,8 @@ export async function GET(req: Request) {
         title: item.title,
         author: item.author,
         coverImageUrl: item.coverImageUrl,
-        hasAudio: item.hasAudio,
         hasPdf: item.hasPdf,
         readingMinutes: item.readingMinutes,
-        audioMinutes: item.audioMinutes,
       })
       .from(item)
       .where(where)
@@ -104,10 +98,8 @@ export async function GET(req: Request) {
           title: string;
           author: string;
           coverImageUrl: string | null;
-          hasAudio: boolean;
           hasPdf: boolean;
           readingMinutes: number | null;
-          audioMinutes: number | null;
         }[],
       ),
     );

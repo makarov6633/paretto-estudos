@@ -12,10 +12,8 @@ type Props = {
     title: string;
     author: string;
     coverImageUrl?: string | null;
-    hasAudio: boolean;
     hasPdf: boolean;
     readingMinutes?: number | null;
-    audioMinutes?: number | null;
   };
 };
 
@@ -56,12 +54,7 @@ export function ItemCard({ item }: Props) {
   }, [src]);
 
   const currentSrc = src || fallbacks[0] || "/illustrations/celebrate.svg";
-  const minutesText = [
-    item.readingMinutes ? `${item.readingMinutes} min leitura` : null,
-    item.audioMinutes ? `${item.audioMinutes} min áudio` : null,
-  ]
-    .filter(Boolean)
-    .join(" • ");
+  const minutesText = item.readingMinutes ? `${item.readingMinutes} min` : null;
 
   return (
     <Card className="surface-card overflow-hidden group transition-all duration-300 hover:shadow-elevated active:scale-[0.98] touch-manipulation focus-within:ring-1 focus-within:ring-ring">
@@ -83,18 +76,11 @@ export function ItemCard({ item }: Props) {
             }}
           />
 
-          {(item.hasAudio || item.hasPdf) && (
-            <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 flex items-center gap-0.5 sm:gap-1">
-              {item.hasAudio && (
-                <Badge className="bg-black/70 text-white backdrop-blur px-1 sm:px-1.5 py-0 h-4 sm:h-5 text-[9px] sm:text-[10px]">
-                  Áudio
-                </Badge>
-              )}
-              {item.hasPdf && (
-                <Badge className="bg-black/70 text-white backdrop-blur px-1 sm:px-1.5 py-0 h-4 sm:h-5 text-[9px] sm:text-[10px]">
-                  PDF
-                </Badge>
-              )}
+          {item.hasPdf && (
+            <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2">
+              <Badge className="bg-black/70 text-white backdrop-blur px-1 sm:px-1.5 py-0 h-4 sm:h-5 text-[9px] sm:text-[10px]">
+                PDF
+              </Badge>
             </div>
           )}
 
@@ -116,10 +102,9 @@ export function ItemCard({ item }: Props) {
         </p>
       </CardHeader>
       <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
-        {item.hasAudio || item.hasPdf ? (
+        {item.hasPdf ? (
           <div className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
-            {minutesText || "Conteúdo otimizado"} - aprenda 95% em 20% do
-            tempo
+            {minutesText || "Resumo"} - aprenda 95% em 20% do tempo
           </div>
         ) : (
           <Badge variant="secondary" className="text-[10px] sm:text-xs">Em produção</Badge>

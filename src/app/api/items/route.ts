@@ -1,6 +1,6 @@
 ﻿import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { item, audioTrack, summarySection, syncMap } from "@/lib/schema";
+import { item, summarySection } from "@/lib/schema";
 import {
 } from "@/lib/manual-fixes";
 import {
@@ -38,14 +38,12 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim();
     const slug = searchParams.get("slug")?.trim();
-    const hasAudio = searchParams.get("hasAudio");
     const hasPdf = searchParams.get("hasPdf");
     const tag = searchParams.get("tag");
     const limit = Number(searchParams.get("limit") ?? 1000);
     const page = Number(searchParams.get("page") ?? 1);
     const offset = (page - 1) * limit;
     const expand = searchParams.get("expand");
-    const withSync = searchParams.get("withSync") === "1";
     const sort = searchParams.get("sort");
 
     // ETag helper for conditional responses
@@ -65,8 +63,8 @@ export async function GET(req: Request) {
 
     const whereClauses: SQLWrapper[] = [];
     if (slug) {
-      // For full content expansion with sections/audio, enforce access control
-      if (expand === "full" || expand === "tracks") {
+      // For full content expansion with sections, enforce access control
+      if (expand === "full") {
         const userId = await getUserIdFromRequest(req);
         if (!userId) {
           return NextResponse.json(
@@ -96,48 +94,16 @@ export async function GET(req: Request) {
         );
       // Aplique correções manuais (titulo/capa/autor) por slug
       const correctedRows = rows;
-      if (expand === "tracks") {
-        const tracks = await db
-          .select()
-          .from(audioTrack)
-          .where(
-            inArray(
-              audioTrack.itemId,
-              rows.map((r) => r.id),
-            ),
-          );
-        const withTracks = correctedRows.map((r) => ({
-          ...r,
-          title: fixTitle(r.title),
-          audioTracks: tracks.filter(
-            (t) => t.itemId === r.id,
-          ),
-        }));
-        return withConditionalETag(
-          { items: withTracks, page: 1, limit: 1 },
-          "public, s-maxage=180, stale-while-revalidate=60",
-        );
-      }
       if (expand === "full") {
-        const [tracks, sections, sync] = await Promise.all([
-          db.select().from(audioTrack).where(eq(audioTrack.itemId, rows[0].id)),
-          db
-            .select()
-            .from(summarySection)
-            .where(eq(summarySection.itemId, rows[0].id))
-            .orderBy(summarySection.orderIndex),
-          db
-            .select()
-            .from(syncMap)
-            .where(eq(syncMap.itemId, rows[0].id))
-            .limit(1),
-        ]);
+        const sections = await db
+          .select()
+          .from(summarySection)
+          .where(eq(summarySection.itemId, rows[0].id))
+          .orderBy(summarySection.orderIndex);
         const enriched = {
           ...correctedRows[0],
           title: fixTitle(correctedRows[0].title),
-          audioTracks: tracks,
           sections,
-          syncMap: sync[0] ?? null,
         };
         return withConditionalETag(
           { items: [enriched], page: 1, limit: 1 },
@@ -160,7 +126,6 @@ export async function GET(req: Request) {
       // match on title (and optionally author if schema supports)
       whereClauses.push(ilike(item.title, `%${q}%`));
     }
-    if (hasAudio === "1") whereClauses.push(eq(item.hasAudio, true));
     if (hasPdf === "1") whereClauses.push(eq(item.hasPdf, true));
     // Filtro por tag: como tags Ã© jsonb, usamos um fallback simples no tÃ­tulo
     if (tag) whereClauses.push(ilike(item.title, `%${tag}%`));
@@ -173,10 +138,8 @@ export async function GET(req: Request) {
       title: item.title,
       author: item.author,
       coverImageUrl: item.coverImageUrl,
-      hasAudio: item.hasAudio,
       hasPdf: item.hasPdf,
       readingMinutes: item.readingMinutes,
-      audioMinutes: item.audioMinutes,
       createdAt: item.createdAt,
     } as const;
 
@@ -196,10 +159,8 @@ export async function GET(req: Request) {
       title: string;
       author: string;
       coverImageUrl: string | null;
-      hasAudio: boolean;
       hasPdf: boolean;
       readingMinutes: number | null;
-      audioMinutes: number | null;
       createdAt: Date;
     };
     const data: Row[] = await ordered.limit(limit).offset(offset);
@@ -236,25 +197,8 @@ export async function GET(req: Request) {
     }
     const unique = Array.from(uniqMap.values());
 
-    // Optionally annotate sync presence
-    type RowWithSync = Row & { hasSync: boolean };
-    let out: Row[] | RowWithSync[] = unique;
-    if (withSync && unique.length) {
-      try {
-        const ids = unique.map((u) => u.id);
-        const rows = await db
-          .select({ itemId: syncMap.itemId })
-          .from(syncMap)
-          .where(inArray(syncMap.itemId, ids));
-        const set = new Set(rows.map((r) => r.itemId));
-        out = unique.map((u) => ({ ...u, hasSync: set.has(u.id) }));
-      } catch (e) {
-        console.warn("withSync annotate failed", e);
-      }
-    }
-
     return withConditionalETag(
-      { items: out, page, limit },
+      { items: unique, page, limit },
       "public, s-maxage=180, stale-while-revalidate=60",
     );
   } catch (error) {

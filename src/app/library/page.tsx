@@ -7,7 +7,6 @@ type SearchParams = Record<string, string | string[] | undefined>;
 async function ItemsList({ searchParams }: { searchParams: SearchParams }) {
   const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
   const tag = typeof searchParams.tag === "string" ? searchParams.tag : undefined;
-  const hasAudio = typeof searchParams.audio === "string" ? searchParams.audio : undefined;
   const hasPdf = typeof searchParams.read === "string" ? searchParams.read : undefined;
 
   const hdrs = await headers();
@@ -20,7 +19,6 @@ async function ItemsList({ searchParams }: { searchParams: SearchParams }) {
   const url = new URL("/api/items", origin);
   if (q) url.searchParams.set("q", q);
   if (tag) url.searchParams.set("tag", tag);
-  if (hasAudio === "1") url.searchParams.set("hasAudio", "1");
   if (hasPdf === "1") url.searchParams.set("hasPdf", "1");
 
   const res = await fetch(url.toString(), { cache: "no-store" });
@@ -59,10 +57,7 @@ export default async function LibraryPage({
           </form>
           <div className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto pb-1">
             <a href="/library?read=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
-              Leitura
-            </a>
-            <a href="/library?audio=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
-              Áudio
+              Com PDF
             </a>
             <a href="/library" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
               Todos

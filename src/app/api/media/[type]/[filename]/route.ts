@@ -3,7 +3,7 @@ import { getUserIdFromRequest, checkUserAccess } from '@/lib/access-control';
 import fs from 'fs/promises';
 import path from 'path';
 
-const ALLOWED_TYPES = ['pdf', 'audio'] as const;
+const ALLOWED_TYPES = ['pdf'] as const;
 type MediaType = typeof ALLOWED_TYPES[number];
 
 /**
@@ -54,11 +54,9 @@ export async function GET(
     const file = await fs.readFile(filePath);
 
     // Set appropriate content type
-    const contentType = params.type === 'pdf'
-      ? 'application/pdf'
-      : 'audio/wav';
+    const contentType = 'application/pdf';
 
-    return new NextResponse(file, {
+    return new NextResponse(file as unknown as BodyInit, {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `inline; filename="${sanitizedFilename}"`,
