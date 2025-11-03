@@ -68,11 +68,9 @@ export const item = pgTable("item", {
   language: text("language").notNull().default("pt-BR"),
   coverImageUrl: text("coverImageUrl"),
   pdfUrl: text("pdfUrl"),
-  hasAudio: boolean("hasAudio").notNull().default(false),
   hasPdf: boolean("hasPdf").notNull().default(false),
   tags: jsonb("tags"),
   readingMinutes: integer("readingMinutes"),
-  audioMinutes: integer("audioMinutes"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
@@ -85,26 +83,6 @@ export const summarySection = pgTable("summary_section", {
   orderIndex: integer("orderIndex").notNull(),
   heading: text("heading"),
   contentHtml: text("contentHtml"),
-});
-
-export const audioTrack = pgTable("audio_track", {
-  id: text("id").primaryKey(),
-  itemId: text("itemId")
-    .notNull()
-    .references(() => item.id, { onDelete: "cascade" }),
-  voice: text("voice"),
-  language: text("language"),
-  audioUrl: text("audioUrl").notNull(),
-  durationMs: integer("durationMs"),
-});
-
-export const syncMap = pgTable("sync_map", {
-  id: text("id").primaryKey(),
-  itemId: text("itemId")
-    .notNull()
-    .references(() => item.id, { onDelete: "cascade" }),
-  granularity: text("granularity"), // 'line' | 'word'
-  data: jsonb("data"), // WebVTT/JSON parsed structure
 });
 
 // --- Personalization ---

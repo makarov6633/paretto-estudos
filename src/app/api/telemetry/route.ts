@@ -4,9 +4,23 @@ import { item, readingEvent } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import { telemetrySchema } from "@/schemas";
 import { z } from "zod";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { verifyCsrf } from "@/lib/security";
 // (no unused types required here)
 
 export async function POST(req: Request) {
+  // CSRF protection
+  if (!verifyCsrf(req)) {
+    return NextResponse.json({ ok: false, error: "CSRF validation failed" }, { status: 403 });
+  }
+
+  // Authentication check
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return NextResponse.json({ ok: false, error: "Authentication required" }, { status: 401 });
+  }
+
   try {
     const len = Number(req.headers.get("content-length") || 0);
     if (len && len > 64 * 1024) {
@@ -20,15 +34,25 @@ export async function POST(req: Request) {
     const parsed = schema.safeParse(json);
     if (!parsed.success)
       return NextResponse.json(
-        { ok: false, error: parsed.error.flatten() },
+        { ok: false, error: "Invalid payload" },
         { status: 400 },
       );
     const {
-      userId,
+      userId: requestedUserId,
       name: event,
       itemId,
     } = parsed.data as { userId?: string; name: string; itemId: string };
-    if (!userId || !itemId || !event) {
+    
+    // Validate userId matches session
+    if (requestedUserId && requestedUserId !== session.user.id) {
+      return NextResponse.json(
+        { ok: false, error: "Forbidden: Cannot log events for other users" },
+        { status: 403 },
+      );
+    }
+    
+    const userId = session.user.id;
+    if (!itemId || !event) {
       return NextResponse.json(
         { ok: false, error: "missing fields" },
         { status: 400 },

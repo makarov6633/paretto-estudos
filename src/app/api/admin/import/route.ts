@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { item, summarySection, audioTrack, syncMap } from "@/lib/schema";
+import { item, summarySection } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "@/lib/schema";
 import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
 
 const sectionSchema = z.object({
   id: z.string().optional(),
@@ -13,38 +14,18 @@ const sectionSchema = z.object({
   contentHtml: z.string().optional(),
 });
 
-const trackSchema = z.object({
-  id: z.string().optional(),
-  voice: z.string().optional(),
-  language: z.string().optional(),
-  // Accept absolute OR relative paths (served from /public)
-  audioUrl: z.string().min(1),
-  durationMs: z.number().int().optional(),
-});
-
-const syncSchema = z.object({
-  id: z.string().optional(),
-  granularity: z.enum(["line", "word"]).optional(),
-  data: z.any().optional(),
-});
-
 const itemSchema = z.object({
   id: z.string().optional(),
   slug: z.string(),
   title: z.string(),
   author: z.string(),
   language: z.string().default("pt-BR").optional(),
-  // Accept relative URLs too
-  coverImageUrl: z.string().optional(),
-  pdfUrl: z.string().optional(),
-  hasAudio: z.boolean().optional(),
+  coverImageUrl: z.string().url().or(z.string().startsWith('/')).optional(),
+  pdfUrl: z.string().url().or(z.string().startsWith('/')).optional(),
   hasPdf: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
   readingMinutes: z.number().int().optional(),
-  audioMinutes: z.number().int().optional(),
   sections: z.array(sectionSchema).optional(),
-  audioTracks: z.array(trackSchema).optional(),
-  syncMap: syncSchema.optional(),
 });
 
 const payloadSchema = z.object({
@@ -107,11 +88,9 @@ export async function POST(req: Request) {
             language: raw.language ?? "pt-BR",
             coverImageUrl: raw.coverImageUrl,
             pdfUrl: raw.pdfUrl,
-            hasAudio: raw.hasAudio ?? false,
             hasPdf: raw.hasPdf ?? Boolean(raw.pdfUrl),
             tags: raw.tags ? (raw.tags as unknown as object) : undefined,
             readingMinutes: raw.readingMinutes,
-            audioMinutes: raw.audioMinutes,
           });
 
           if (raw.sections?.length) {
@@ -121,45 +100,22 @@ export async function POST(req: Request) {
                 itemId: id,
                 orderIndex: s.orderIndex,
                 heading: s.heading,
-                contentHtml: s.contentHtml,
+                contentHtml: s.contentHtml ? DOMPurify.sanitize(s.contentHtml) : undefined,
               })),
             );
-          }
-
-          if (raw.audioTracks?.length) {
-            await tx.insert(audioTrack).values(
-              raw.audioTracks.map((t) => ({
-                id: t.id ?? crypto.randomUUID(),
-                itemId: id,
-                voice: t.voice,
-                language: t.language,
-                audioUrl: t.audioUrl,
-                durationMs: t.durationMs,
-              })),
-            );
-          }
-
-          if (raw.syncMap) {
-            await tx.insert(syncMap).values({
-              id: raw.syncMap.id ?? crypto.randomUUID(),
-              itemId: id,
-              granularity: raw.syncMap.granularity,
-              data: raw.syncMap.data as unknown as object,
-            });
           }
 
           results.push({ slug: raw.slug, status: "imported" });
         } catch (e: unknown) {
-          const msg = e instanceof Error ? e.message : String(e);
+          const msg = e instanceof Error ? 'Import failed' : 'Unknown error';
           results.push({ slug: raw.slug, status: "failed", error: msg });
         }
       }
     });
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("admin/import transaction error", msg);
+    console.error("admin/import transaction error", e);
     return NextResponse.json(
-      { ok: false, results, error: msg },
+      { ok: false, results, error: 'Import transaction failed' },
       { status: 500 },
     );
   }

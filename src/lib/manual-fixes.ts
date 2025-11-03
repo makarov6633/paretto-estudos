@@ -4,7 +4,6 @@ export type PartialItem = {
   author: string;
   coverImageUrl?: string | null;
   pdfUrl?: string | null;
-  hasAudio?: boolean;
   hasPdf?: boolean;
 };
 
