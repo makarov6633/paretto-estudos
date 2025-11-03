@@ -155,8 +155,8 @@ export default async function PlansPage() {
               <CardHeader className="relative border-none pb-0">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-transparent to-transparent" />
                 <div className="relative space-y-2">
-                  <CardTitle className="text-3xl font-semibold text-foreground">
-                    Premium - R$ 15/mes
+                  <CardTitle className="text-2xl sm:text-3xl font-semibold text-foreground">
+                    Premium - R$ 15/mês
                   </CardTitle>
                   <CardDescription className="text-muted-foreground">
                     Tudo ilimitado, com conteudos completos e integracoes.
@@ -164,7 +164,7 @@ export default async function PlansPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6 pt-6">
-                <div className="grid gap-4 text-sm text-muted-foreground sm:grid-cols-2">
+                <div className="grid gap-3 sm:gap-4 text-sm text-muted-foreground grid-cols-1 sm:grid-cols-2">
                   <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] p-4">
                     PDFs completos, audios premium e notas estruturadas.
                   </div>

@@ -70,7 +70,7 @@ export function ItemCard({ item }: Props) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={currentSrc}
-            alt={item.title}
+            alt={`Capa do resumo: ${item.title} por ${item.author}`}
             className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03] group-active:scale-[1.01]"
             onError={() => {
               if (fallbacks.length) {
@@ -86,12 +86,12 @@ export function ItemCard({ item }: Props) {
           {(item.hasAudio || item.hasPdf) && (
             <div className="absolute top-1.5 sm:top-2 right-1.5 sm:right-2 flex items-center gap-0.5 sm:gap-1">
               {item.hasAudio && (
-                <Badge className="bg-black/70 text-white backdrop-blur px-1 sm:px-1.5 py-0 h-4 sm:h-5 text-[9px] sm:text-[10px]">
+                <Badge className="bg-black/80 text-white backdrop-blur px-1.5 sm:px-2 py-0.5 h-5 sm:h-6 text-[10px] sm:text-xs font-medium" aria-label="Disponível em áudio">
                   Áudio
                 </Badge>
               )}
               {item.hasPdf && (
-                <Badge className="bg-black/70 text-white backdrop-blur px-1 sm:px-1.5 py-0 h-4 sm:h-5 text-[9px] sm:text-[10px]">
+                <Badge className="bg-black/80 text-white backdrop-blur px-1.5 sm:px-2 py-0.5 h-5 sm:h-6 text-[10px] sm:text-xs font-medium" aria-label="Disponível em PDF">
                   PDF
                 </Badge>
               )}
@@ -101,7 +101,7 @@ export function ItemCard({ item }: Props) {
           {/* Gradiente inferior para garantir legibilidade do título */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 sm:h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 px-2 sm:px-3 pb-1.5 sm:pb-2">
-            <div className="text-[10px] sm:text-xs font-semibold tracking-tight text-white line-clamp-2 drop-shadow-sm">
+            <div className="text-xs sm:text-sm font-semibold tracking-tight text-white line-clamp-2 drop-shadow-sm">
               {item.title}
             </div>
           </div>
@@ -111,18 +111,17 @@ export function ItemCard({ item }: Props) {
         <h3 className="text-xs sm:text-sm font-semibold leading-tight line-clamp-2 heading">
           {item.title}
         </h3>
-        <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1">
+        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
           {item.author}
         </p>
       </CardHeader>
       <CardContent className="p-3 sm:p-4 pt-0 sm:pt-0">
         {item.hasAudio || item.hasPdf ? (
-          <div className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
-            {minutesText || "Conteúdo otimizado"} - aprenda 95% em 20% do
-            tempo
+          <div className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            {minutesText || "Conteúdo otimizado"} - aprenda 95% em 20% do tempo
           </div>
         ) : (
-          <Badge variant="secondary" className="text-[10px] sm:text-xs">Em produção</Badge>
+          <Badge variant="secondary" className="text-xs sm:text-sm">Em produção</Badge>
         )}
       </CardContent>
     </Card>

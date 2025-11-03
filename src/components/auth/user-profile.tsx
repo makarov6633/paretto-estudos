@@ -86,7 +86,7 @@ export function UserProfile() {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60 rounded-2xl border border-white/10 bg-black/90 text-neutral-100 shadow-lg">
+      <DropdownMenuContent align="end" className="w-56 sm:w-60 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-black/90 text-neutral-100 shadow-lg" sideOffset={8}>
         <DropdownMenuLabel className="font-normal pb-3 border-b border-white/10">
           <div className="flex flex-col space-y-2">
             <p className="text-sm font-semibold leading-none tracking-tight">

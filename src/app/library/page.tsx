@@ -28,7 +28,7 @@ async function ItemsList({ searchParams }: { searchParams: SearchParams }) {
   const items: Item[] = Array.isArray(data.items) ? data.items : [];
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 lg:gap-5">
       {items.map((it) => (
         <ItemCard key={it.id} item={it} />
       ))}
@@ -49,22 +49,25 @@ export default async function LibraryPage({
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-end">
           <form className="flex-1">
+            <label htmlFor="library-search" className="sr-only">Buscar resumos</label>
             <input
+              id="library-search"
               type="text"
               name="q"
               defaultValue={typeof sp.q === "string" ? sp.q : ""}
               placeholder="Encontre seu próximo título"
-              className="h-10 sm:h-11 w-full rounded-md border border-border bg-card px-3 sm:px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary touch-manipulation"
+              aria-label="Buscar resumos por título ou autor"
+              className="h-11 w-full rounded-md border border-border bg-card px-3 sm:px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary touch-manipulation"
             />
           </form>
-          <div className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto pb-1">
-            <a href="/library?read=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
+          <div className="flex items-center gap-2 text-sm overflow-x-auto pb-2 -mx-1 px-1 sm:mx-0 sm:px-0" role="group" aria-label="Filtrar por tipo de conteúdo">
+            <a href="/library?read=1" className="rounded-md border border-border px-3 py-2 min-h-[44px] flex items-center transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation" aria-label="Filtrar apenas resumos com leitura">
               Leitura
             </a>
-            <a href="/library?audio=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
+            <a href="/library?audio=1" className="rounded-md border border-border px-3 py-2 min-h-[44px] flex items-center transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation" aria-label="Filtrar apenas resumos com áudio">
               Áudio
             </a>
-            <a href="/library" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
+            <a href="/library" className="rounded-md border border-border px-3 py-2 min-h-[44px] flex items-center transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation" aria-label="Mostrar todos os resumos">
               Todos
             </a>
           </div>

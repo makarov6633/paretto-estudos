@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { ItemCard } from "@/components/ItemCard";
+import { ItemGridSkeleton } from "@/components/ItemCardSkeleton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Item } from "@/types";
 import {
   CheckCircle2,
@@ -116,8 +118,8 @@ export default function Home() {
 
       <section id="hero" className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
         <div className="relative mt-6 sm:mt-10 md:mt-16">
-          <h1 className="leading-none tracking-tight text-white select-none">
-            <span className="block text-[20vw] sm:text-[18vw] md:text-[16vw] xl:text-[12vw] 2xl:text-[10vw] font-extrabold">
+          <h1 className="leading-none tracking-tight text-white">
+            <span className="block text-[clamp(3rem,15vw,10rem)] sm:text-[clamp(4rem,12vw,8rem)] font-extrabold">
               <span className="text-shadow-hero">PARETTO</span>
             </span>
           </h1>
@@ -129,13 +131,15 @@ export default function Home() {
           <div className="mt-5 sm:mt-6 flex flex-col xs:flex-row items-stretch xs:items-center gap-2.5 sm:gap-3">
             <Link
               href="/requests"
-              className="no-underline inline-flex items-center justify-center gap-2 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-medium tracking-tight text-white bg-emerald-500/90 hover:bg-emerald-500 transition-colors touch-manipulation"
+              className="no-underline inline-flex items-center justify-center gap-2 rounded-full px-5 sm:px-6 py-3 sm:py-3.5 min-h-[44px] text-sm font-medium tracking-tight text-white bg-emerald-500/90 hover:bg-emerald-500 transition-colors touch-manipulation"
+              aria-label="Solicitar novo resumo pelo método Paretto 20/95"
             >
               Pedir resumo 20/95
             </Link>
             <Link
               href="/library"
-              className="no-underline inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 sm:px-5 py-2.5 sm:py-3 text-sm font-medium tracking-tight text-foreground bg-[color:var(--overlay-card)] transition-colors hover:bg-[color:var(--overlay-soft)] touch-manipulation"
+              className="no-underline inline-flex items-center justify-center gap-2 rounded-full border border-border px-5 sm:px-6 py-3 sm:py-3.5 min-h-[44px] text-sm font-medium tracking-tight text-foreground bg-[color:var(--overlay-card)] transition-colors hover:bg-[color:var(--overlay-soft)] touch-manipulation"
+              aria-label="Ver catálogo completo de resumos"
             >
               Ver catálogo
             </Link>
@@ -306,13 +310,15 @@ export default function Home() {
             Ver todos
           </Link>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-          {recLoading && (
-            <div className="text-sm text-muted-foreground">Carregando…</div>
+        <ErrorBoundary>
+          {recLoading ? (
+            <ItemGridSkeleton count={8} />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+              {recItems.map((it) => <ItemCard key={it.id} item={it as Item} />)}
+            </div>
           )}
-          {!recLoading &&
-            recItems.map((it) => <ItemCard key={it.id} item={it as Item} />)}
-        </div>
+        </ErrorBoundary>
       </section>
 
       <section

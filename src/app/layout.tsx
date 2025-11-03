@@ -30,11 +30,13 @@ export const metadata: Metadata = {
   },
 };
 
-// Viewport meta for proper mobile scaling
+// Viewport meta for proper mobile scaling with safe-area support
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
 } as const;
 
 export default function RootLayout({

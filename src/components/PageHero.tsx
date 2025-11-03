@@ -37,8 +37,8 @@ export function PageHero({
     <section className="relative overflow-hidden rounded-[2.5rem] border border-border bg-[color:var(--overlay-card)] px-6 py-10 shadow-[0_35px_70px_-40px_rgba(15,23,42,0.45)] sm:px-10 sm:py-14">
       <div className={`absolute inset-0 bg-[radial-gradient(circle_at_top,var(--hero-highlight)_0%,transparent_65%)]`} />
       <div className={`absolute inset-0 bg-gradient-to-b ${accent} via-transparent to-transparent opacity-80`} />
-      <div className="absolute -top-24 left-12 h-64 w-64 rounded-full bg-[color-mix(in srgb,var(--hero-highlight) 45%,transparent 55%)] blur-3xl" />
-      <div className="absolute -bottom-32 right-10 h-72 w-72 rounded-full bg-[color-mix(in srgb,var(--hero-highlight) 55%,transparent 45%)] blur-3xl" />
+      <div className="absolute -top-12 sm:-top-24 left-2 sm:left-12 h-32 w-32 sm:h-64 sm:w-64 rounded-full bg-[color-mix(in srgb,var(--hero-highlight) 45%,transparent 55%)] blur-3xl" />
+      <div className="absolute -bottom-16 sm:-bottom-32 right-2 sm:right-10 h-40 w-40 sm:h-72 sm:w-72 rounded-full bg-[color-mix(in srgb,var(--hero-highlight) 55%,transparent 45%)] blur-3xl" />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom, rgba(255,255,255,0.04), transparent_35%, rgba(0,0,0,0.08))]" />
       <div className="relative space-y-8 text-foreground">
         <div className="space-y-4">

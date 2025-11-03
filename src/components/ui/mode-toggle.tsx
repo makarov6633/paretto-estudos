@@ -37,7 +37,8 @@ export function ModeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-52 rounded-2xl border border-white/10 bg-black/90 px-2 py-2 text-neutral-100 shadow-lg"
+        className="w-48 sm:w-52 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-black/90 px-2 py-2 text-neutral-100 shadow-lg"
+        sideOffset={8}
       >
         {THEME_OPTIONS.map(({ key, label, icon: Icon }) => {
           const active = resolvedTheme === key;

@@ -248,10 +248,12 @@ export default function ChatPage() {
                   className="flex flex-col gap-3 sm:flex-row"
                 >
                   <input
+                    id="chat-input"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Escreva sua pergunta ou pedido"
-                    className="flex-1 rounded-full border border-border bg-[color:var(--overlay-card)] px-4 py-3 text-sm text-foreground placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    aria-label="Digite sua mensagem para o assistente"
+                    className="flex-1 rounded-full border border-border bg-[color:var(--overlay-card)] px-4 py-3 min-h-[44px] text-sm text-foreground placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 touch-manipulation"
                   />
                   <Button
                     type="submit"

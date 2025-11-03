@@ -263,10 +263,18 @@ export default function ReadPage() {
     };
   }, [jumpToChapterIndex, seekToMs, skipIntro, canSkipIntro, chapterCount]);
 
-  if (!item) return <div className="container mx-auto p-6">Carregando...</div>;
+  if (!item) return (
+    <div className="container mx-auto p-6">
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground">Carregando resumo...</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-black">
+    <div className="fixed inset-0 w-screen h-screen bg-black" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Voltar para a biblioteca */}
       <a href="/library" className="fixed left-3 top-3 z-50 opacity-90 hover:opacity-100" aria-label="Voltar para a biblioteca" title="Voltar para a biblioteca">
         <Button
@@ -320,26 +328,27 @@ export default function ReadPage() {
       )}
 
       {/* Minimal floating player that auto-hides */}
-      <div className="fixed z-50 bottom-3 right-3 opacity-80 hover:opacity-100 transition-opacity max-w-[98vw] overflow-x-auto">
-        <div className="flex items-center whitespace-nowrap gap-1.5 sm:gap-2 rounded-full bg-black/70 text-white shadow-lg backdrop-blur px-2.5 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] md:text-xs">
+      <div className="fixed z-50 bottom-2 right-2 sm:bottom-3 sm:right-3 opacity-80 hover:opacity-100 transition-opacity max-w-[95vw] overflow-x-auto">
+        <div className="flex items-center flex-wrap sm:flex-nowrap gap-1 sm:gap-2 rounded-2xl sm:rounded-full bg-black/80 text-white shadow-lg backdrop-blur px-2 py-2 sm:px-3 sm:py-2 text-xs sm:text-sm">
           <Button
             size="sm"
             variant="outline"
-            className="h-7 sm:h-8 px-2 sm:px-3 text-[10px] sm:text-xs"
+            className="h-10 sm:h-9 px-3 text-xs sm:text-sm"
             onClick={() => {
               const a = audioRef.current; if (!a) return;
               if (a.paused) a.play(); else a.pause();
             }}
+            aria-label={isPaused ? 'Reproduzir áudio' : 'Pausar áudio'}
           >
             {isPaused ? 'Play' : 'Pause'}
           </Button>
-          <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs" aria-label="Voltar 10 segundos" onClick={()=>{ const a=audioRef.current; if(!a) return; a.currentTime = Math.max(0, a.currentTime - 10); }}>-10s</Button>
-          <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs" aria-label="Avançar 10 segundos" onClick={()=>{ const a=audioRef.current; if(!a) return; a.currentTime = a.currentTime + 10; }}>+10s</Button>
+          <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2 text-xs" aria-label="Voltar 10 segundos" onClick={()=>{ const a=audioRef.current; if(!a) return; a.currentTime = Math.max(0, a.currentTime - 10); }}>-10s</Button>
+          <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2 text-xs" aria-label="Avançar 10 segundos" onClick={()=>{ const a=audioRef.current; if(!a) return; a.currentTime = a.currentTime + 10; }}>+10s</Button>
           {canSkipIntro && (
             <Button
               size="sm"
               variant="outline"
-              className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs"
+              className="h-10 sm:h-9 px-2 text-xs"
               onClick={skipIntro}
               aria-label="Pular introducao"
             >
@@ -350,7 +359,7 @@ export default function ReadPage() {
             <Button
               size="sm"
               variant="outline"
-              className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs"
+              className="h-10 sm:h-9 px-2 text-xs"
               onClick={() => setShowChapters((value) => !value)}
               aria-label="Ver capitulos"
             >
@@ -358,12 +367,13 @@ export default function ReadPage() {
             </Button>
           )}
           <div className="flex items-center gap-1">
-            Vel
-            <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2" onClick={()=>{ const a=audioRef.current; if(!a) return; const v=Math.max(0.5, Math.round((a.playbackRate-0.25)*100)/100); a.playbackRate=v; setSpeed(v); }}>-</Button>
-            <span className="w-9 sm:w-10 text-center">{speed.toFixed(2)}x</span>
-            <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2" onClick={()=>{ const a=audioRef.current; if(!a) return; const v=Math.min(3, Math.round((a.playbackRate+0.25)*100)/100); a.playbackRate=v; setSpeed(v); }}>+</Button>
-            <label className="ml-1 sm:ml-2 inline-flex items-center gap-1">
+            <span className="text-xs">Vel</span>
+            <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2" onClick={()=>{ const a=audioRef.current; if(!a) return; const v=Math.max(0.5, Math.round((a.playbackRate-0.25)*100)/100); a.playbackRate=v; setSpeed(v); }} aria-label="Diminuir velocidade">-</Button>
+            <span className="w-9 sm:w-10 text-center text-xs">{speed.toFixed(2)}x</span>
+            <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2" onClick={()=>{ const a=audioRef.current; if(!a) return; const v=Math.min(3, Math.round((a.playbackRate+0.25)*100)/100); a.playbackRate=v; setSpeed(v); }} aria-label="Aumentar velocidade">+</Button>
+            <label htmlFor="keepPitch" className="ml-1 sm:ml-2 inline-flex items-center gap-1 cursor-pointer">
               <input
+                id="keepPitch"
                 type="checkbox"
                 checked={keepPitch}
                 onChange={(e)=>{
@@ -375,61 +385,52 @@ export default function ReadPage() {
                     if ("webkitPreservesPitch" in el) el.webkitPreservesPitch = !!e.target.checked;
                   }
                 }}
+                className="w-4 h-4"
               />
-              Tom
+              <span className="text-xs">Tom</span>
             </label>
           </div>
           {/* Divider */}
           <div className="mx-1 h-4 sm:h-5 w-px bg-white/30" />
           {/* Mode toggle */}
           <Button
-
             size="sm"
-
             variant="outline"
-
-            className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs"
-
+            className="h-10 sm:h-9 px-2 text-xs"
             onClick={() => {
-
               if (!item?.pdfUrl) return;
-
               setShowPdf((value) => !value);
-
             }}
-
             disabled={!item?.pdfUrl}
-
+            aria-label={showPdf ? 'Mudar para modo texto' : 'Mudar para modo PDF'}
           >
-
             {showPdf ? 'PDF' : 'TXT'}
-
           </Button>
 
           {/* Zoom controls depend on mode */}
 
           {showPdf ? (
             <div className="flex items-center gap-1">
-              Zoom
-              <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2" onClick={()=> setPdfScale(v=> Math.max(0.5, Math.round((v-0.1)*10)/10))}>-</Button>
-              <span className="w-9 sm:w-10 text-center">{pdfScale.toFixed(1)}x</span>
-              <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2" onClick={()=> setPdfScale(v=> Math.min(2.5, Math.round((v+0.1)*10)/10))}>+</Button>
+              <span className="text-xs">Zoom</span>
+              <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2" onClick={()=> setPdfScale(v=> Math.max(0.5, Math.round((v-0.1)*10)/10))} aria-label="Diminuir zoom">-</Button>
+              <span className="w-9 sm:w-10 text-center text-xs">{pdfScale.toFixed(1)}x</span>
+              <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2" onClick={()=> setPdfScale(v=> Math.min(2.5, Math.round((v+0.1)*10)/10))} aria-label="Aumentar zoom">+</Button>
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              A+
-              <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2" onClick={()=> setScale(v=> Math.max(0.8, Math.round((v-0.1)*10)/10))}>-</Button>
-              <span className="w-9 sm:w-10 text-center">{scale.toFixed(1)}x</span>
-              <Button size="sm" variant="outline" className="h-7 sm:h-8 px-2" onClick={()=> setScale(v=> Math.min(2.0, Math.round((v+0.1)*10)/10))}>+</Button>
+              <span className="text-xs">A+</span>
+              <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2" onClick={()=> setScale(v=> Math.max(0.8, Math.round((v-0.1)*10)/10))} aria-label="Diminuir tamanho fonte">-</Button>
+              <span className="w-9 sm:w-10 text-center text-xs">{scale.toFixed(1)}x</span>
+              <Button size="sm" variant="outline" className="h-10 sm:h-9 px-2" onClick={()=> setScale(v=> Math.min(2.0, Math.round((v+0.1)*10)/10))} aria-label="Aumentar tamanho fonte">+</Button>
             </div>
           )}
           {/* Theme for text */}
           {!showPdf && (
             <div className="flex items-center gap-1">
-              Cor
-              <Button size="sm" variant={readerTheme==='light'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('light')} aria-label="Tema claro">CL</Button>
-              <Button size="sm" variant={readerTheme==='sepia'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('sepia')} aria-label="Tema sepia">SP</Button>
-              <Button size="sm" variant={readerTheme==='dark'?'default':'outline'} className="h-7 sm:h-8 px-2" onClick={()=>setReaderTheme('dark')} aria-label="Tema escuro">DK</Button>
+              <span className="text-xs">Cor</span>
+              <Button size="sm" variant={readerTheme==='light'?'default':'outline'} className="h-10 sm:h-9 px-2 text-xs" onClick={()=>setReaderTheme('light')} aria-label="Tema claro">CL</Button>
+              <Button size="sm" variant={readerTheme==='sepia'?'default':'outline'} className="h-10 sm:h-9 px-2 text-xs" onClick={()=>setReaderTheme('sepia')} aria-label="Tema sepia">SP</Button>
+              <Button size="sm" variant={readerTheme==='dark'?'default':'outline'} className="h-10 sm:h-9 px-2 text-xs" onClick={()=>setReaderTheme('dark')} aria-label="Tema escuro">DK</Button>
             </div>
           )}
         </div>
@@ -440,7 +441,7 @@ export default function ReadPage() {
             <div className="text-xs opacity-80">Capitulos e marcacoes
               <span className="ml-2 text-[10px] uppercase tracking-[0.12em] opacity-70">{chapterCountLabel}</span>
             </div>
-            <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => setShowChapters(false)}>
+            <Button size="sm" variant="outline" className="h-9 px-2 text-xs" onClick={() => setShowChapters(false)} aria-label="Fechar lista de capítulos">
               Fechar
             </Button>
           </div>

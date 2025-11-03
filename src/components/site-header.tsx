@@ -38,7 +38,7 @@ export function SiteHeader() {
         </div>
 
         {/* Desktop navigation */}
-        <nav className="hidden items-center gap-5 text-sm md:flex">
+        <nav className="hidden items-center gap-5 text-sm md:flex" role="navigation" aria-label="Navegação principal">
           <Link
             href="/library"
             prefetch
@@ -65,12 +65,12 @@ export function SiteHeader() {
           <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" variant="outline" className="md:hidden h-8 w-8 sm:h-9 sm:w-9 p-0 touch-manipulation">
-                <Menu className="h-4 w-4" />
+              <Button size="sm" variant="outline" className="md:hidden h-11 w-11 sm:h-10 sm:w-10 p-0 touch-manipulation" aria-label="Abrir menu de navegação" aria-haspopup="true">
+                <Menu className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="sr-only">Menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 sm:w-52 max-w-[calc(100vw-2rem)]" sideOffset={8}>
               <DropdownMenuItem asChild>
                 <Link href="/library" prefetch className="w-full no-underline">
                   Biblioteca
