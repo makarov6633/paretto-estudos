@@ -180,7 +180,6 @@ export const REQUEST_STATUS = {
 export const TELEMETRY_EVENTS = {
   PAGE_VIEW: "page_view",
   ITEM_OPEN: "item_open",
-  AUDIO_PLAY: "audio_play",
   PDF_DOWNLOAD: "pdf_download",
   SEARCH: "search",
   SIGNUP: "signup",

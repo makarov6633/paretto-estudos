@@ -241,7 +241,7 @@ export default function ProfilePage() {
                     <CardDescription className="text-muted-foreground">
                       {isPremium
                         ? "Seu acesso premium esta ativo. Ajuste renovacoes quando precisar."
-                        : "Assine para liberar audio ilimitado, PDFs e sincronizacao completa."}
+                        : "Assine para liberar PDFs e sincronizacao completa."}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -256,7 +256,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                     <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] p-4">
-                      Acesso ilimitado a resumos, PDFs e audios premium.
+                      Acesso ilimitado a resumos e PDFs.
                     </div>
                     <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] p-4">
                       Cancelamento em um clique, sem taxas extras.

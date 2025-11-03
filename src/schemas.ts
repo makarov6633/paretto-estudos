@@ -33,7 +33,6 @@ export const telemetrySchema = z.object({
 export const recommendationsBodySchema = z.object({
   prefs: z.object({
     tags: z.array(z.string()).default([]),
-    allowAudio: z.boolean().optional(),
   }),
   limit: z.number().int().positive().max(50).default(10),
 });
