@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { RATE_LIMITS } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 
 // Simple in-memory rate limiter (best effort per instance)
 const WINDOW_MS = 60_000; // 1 minute
@@ -22,6 +23,7 @@ function allow(key: string, limit: number) {
 
 export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  const startTime = Date.now();
 
   // Skip static assets & Next internals
   if (
@@ -74,7 +76,17 @@ export function middleware(req: NextRequest) {
                 : RATE_LIMITS.PAGE;
 
   const { ok, remaining, reset } = allow(key, limit);
+  
   if (!ok) {
+    // Log rate limit violation
+    logger.security('Rate limit exceeded', {
+      ip,
+      path,
+      method: req.method,
+      group,
+      limit,
+    });
+
     return new NextResponse("Too Many Requests", {
       status: 429,
       headers: {
@@ -83,6 +95,17 @@ export function middleware(req: NextRequest) {
       },
     });
   }
+
+  // Log suspicious activity
+  if (group === "admin" || (group === "api" && remaining < 3)) {
+    logger.apiRequest(req.method, path, {
+      ip,
+      userAgent: req.headers.get("user-agent") || "unknown",
+      remaining,
+      duration: Date.now() - startTime,
+    });
+  }
+
   return NextResponse.next();
 }
 

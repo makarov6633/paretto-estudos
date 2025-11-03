@@ -4,10 +4,12 @@ import { item, readingEvent } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import { telemetrySchema } from "@/schemas";
 import { z } from "zod";
-// (no unused types required here)
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function POST(req: Request) {
   try {
+    // Validate payload size
     const len = Number(req.headers.get("content-length") || 0);
     if (len && len > 64 * 1024) {
       return NextResponse.json(
@@ -15,19 +17,25 @@ export async function POST(req: Request) {
         { status: 413 },
       );
     }
+
+    // Parse and validate request
     const json = await req.json().catch(() => ({}));
     const schema = telemetrySchema.extend({ itemId: z.string().min(1) });
     const parsed = schema.safeParse(json);
-    if (!parsed.success)
+    
+    if (!parsed.success) {
       return NextResponse.json(
         { ok: false, error: parsed.error.flatten() },
         { status: 400 },
       );
+    }
+
     const {
       userId,
       name: event,
       itemId,
     } = parsed.data as { userId?: string; name: string; itemId: string };
+
     if (!userId || !itemId || !event) {
       return NextResponse.json(
         { ok: false, error: "missing fields" },
@@ -35,6 +43,19 @@ export async function POST(req: Request) {
       );
     }
 
+    // Verify userId matches authenticated session
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || session.user.id !== userId) {
+      return NextResponse.json(
+        { ok: false, error: "unauthorized" },
+        { status: 401 },
+      );
+    }
+
+    // Insert reading event
     await db
       .insert(readingEvent)
       .values({ id: crypto.randomUUID(), userId, itemId, event });
@@ -45,9 +66,11 @@ export async function POST(req: Request) {
       .from(item)
       .where(eq(item.id, itemId))
       .limit(1);
+    
     const tags: string[] = Array.isArray(rows[0]?.tags as unknown as string[])
       ? (rows[0]?.tags as unknown as string[])
       : [];
+    
     if (tags.length) {
       const weight = event === "finish" ? 3 : event === "play" ? 2 : 1;
       for (const tag of tags) {
@@ -59,6 +82,7 @@ export async function POST(req: Request) {
         `);
       }
     }
+    
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("POST /api/telemetry error", e);
