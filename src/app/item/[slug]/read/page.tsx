@@ -6,6 +6,8 @@ import type { Item } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Maximize2, Minimize2, Type, BookOpen } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import DOMPurify from "isomorphic-dompurify";
+import { z } from "zod";
 
 type FullItem = Item & {
   pdfUrl?: string | null;
@@ -17,9 +19,24 @@ type FullItem = Item & {
 };
 
 async function fetchItem(slug: string): Promise<FullItem | null> {
-  const url = new URL(`/api/items?slug=${encodeURIComponent(slug)}&expand=full`, window.location.origin);
-  const data = await fetch(url.toString()).then((r) => r.json());
-  return (data.items?.[0] as FullItem) ?? null;
+  try {
+    const url = new URL(`/api/items?slug=${encodeURIComponent(slug)}&expand=full`, window.location.origin);
+    const response = await fetch(url.toString());
+    
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+        return null;
+      }
+      throw new Error(`Failed to fetch item: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return (data.items?.[0] as FullItem) ?? null;
+  } catch (error) {
+    console.error('Error fetching item:', error);
+    return null;
+  }
 }
 
 export default function ReadPage() {
@@ -33,7 +50,16 @@ export default function ReadPage() {
   const [pdfScale, setPdfScale] = useState(1.0);
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [currentSection, setCurrentSection] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { data: session } = useSession();
+
+  const readerPrefsSchema = z.object({
+    fontSize: z.number().min(14).max(32).optional(),
+    lineHeight: z.number().min(1.2).max(2.4).optional(),
+    maxWidth: z.enum(['narrow', 'medium', 'wide', 'full']).optional(),
+    theme: z.enum(['light', 'sepia', 'dark']).optional(),
+  });
 
   useEffect(() => {
     if (!slug) return;
@@ -44,13 +70,18 @@ export default function ReadPage() {
     const saved = localStorage.getItem('reader-preferences');
     if (saved) {
       try {
-        const prefs = JSON.parse(saved);
-        if (prefs.fontSize) setFontSize(prefs.fontSize);
-        if (prefs.lineHeight) setLineHeight(prefs.lineHeight);
-        if (prefs.maxWidth) setMaxWidth(prefs.maxWidth);
-        if (prefs.theme) setTheme(prefs.theme);
+        const parsed = JSON.parse(saved);
+        const validated = readerPrefsSchema.safeParse(parsed);
+        if (validated.success) {
+          const prefs = validated.data;
+          if (prefs.fontSize) setFontSize(prefs.fontSize);
+          if (prefs.lineHeight) setLineHeight(prefs.lineHeight);
+          if (prefs.maxWidth) setMaxWidth(prefs.maxWidth);
+          if (prefs.theme) setTheme(prefs.theme);
+        }
       } catch (e) {
-        console.error('Failed to load preferences', e);
+        console.warn('Invalid reader preferences');
+        localStorage.removeItem('reader-preferences');
       }
     }
   }, []);
@@ -65,8 +96,99 @@ export default function ReadPage() {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setShowToc(false);
+      setCurrentSection(index);
     }
   }, []);
+
+  const navigateToSection = useCallback((direction: 'prev' | 'next') => {
+    const sections = item?.sections ?? [];
+    if (sections.length === 0) return;
+    
+    const newIndex = direction === 'prev' 
+      ? Math.max(0, currentSection - 1)
+      : Math.min(sections.length - 1, currentSection + 1);
+    
+    scrollToSection(newIndex);
+  }, [item, currentSection, scrollToSection]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if typing in input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      switch(e.key) {
+        case 'Escape':
+          setShowToc(false);
+          setShowSettings(false);
+          break;
+        case 't':
+        case 'T':
+          setShowToc(prev => !prev);
+          break;
+        case 's':
+        case 'S':
+          if (!e.ctrlKey && !e.metaKey) {
+            setShowSettings(prev => !prev);
+          }
+          break;
+        case 'ArrowLeft':
+          if (!showToc && !showSettings) {
+            navigateToSection('prev');
+          }
+          break;
+        case 'ArrowRight':
+          if (!showToc && !showSettings) {
+            navigateToSection('next');
+          }
+          break;
+        case '+':
+        case '=':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            setFontSize(prev => Math.min(32, prev + 2));
+          }
+          break;
+        case '-':
+        case '_':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            setFontSize(prev => Math.max(14, prev - 2));
+          }
+          break;
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [navigateToSection, showToc, showSettings]);
+
+  // Track scroll progress
+  useEffect(() => {
+    const handleScroll = () => {
+      const winHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight - winHeight;
+      const scrolled = window.scrollY;
+      const progress = docHeight > 0 ? (scrolled / docHeight) * 100 : 0;
+      setScrollProgress(Math.min(100, Math.max(0, progress)));
+      
+      // Update current section based on scroll
+      const sections = item?.sections ?? [];
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(`section-${i}`);
+        if (el && el.getBoundingClientRect().top <= 100) {
+          setCurrentSection(i);
+          break;
+        }
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial call
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [item]);
 
   if (!item) {
     return (
@@ -115,6 +237,16 @@ export default function ReadPage() {
         color: currentTheme.text,
       }}
     >
+      {/* Progress Bar */}
+      <div 
+        className="fixed top-0 left-0 right-0 h-1 z-[60] transition-all"
+        style={{
+          width: `${scrollProgress}%`,
+          backgroundColor: currentTheme.secondary,
+          opacity: 0.6,
+        }}
+      />
+
       {/* Header */}
       <header 
         className="sticky top-0 z-50 border-b backdrop-blur-sm"
@@ -125,18 +257,54 @@ export default function ReadPage() {
       >
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
-            <a 
-              href="/library" 
-              className="flex items-center gap-2 hover:opacity-70 transition-opacity"
-              aria-label="Voltar para biblioteca"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              <span className="hidden sm:inline text-sm font-medium">Biblioteca</span>
-            </a>
+            <div className="flex items-center gap-2">
+              <a 
+                href="/library" 
+                className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                aria-label="Voltar para biblioteca"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span className="hidden sm:inline text-sm font-medium">Biblioteca</span>
+              </a>
+              
+              {/* Navigation Buttons */}
+              {sections.length > 1 && !showPdf && (
+                <div className="hidden md:flex items-center gap-1 ml-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => navigateToSection('prev')}
+                    disabled={currentSection === 0}
+                    className="h-8 px-2"
+                    aria-label="Seção anterior"
+                  >
+                    ←
+                  </Button>
+                  <span className="text-xs opacity-70 px-2">
+                    {currentSection + 1} / {sections.length}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => navigateToSection('next')}
+                    disabled={currentSection === sections.length - 1}
+                    className="h-8 px-2"
+                    aria-label="Próxima seção"
+                  >
+                    →
+                  </Button>
+                </div>
+              )}
+            </div>
             
             <div className="flex-1 text-center min-w-0">
               <h1 className="text-sm sm:text-base font-semibold truncate">{item.title}</h1>
-              <p className="text-xs opacity-70 truncate">{item.author}</p>
+              <p className="text-xs opacity-70 truncate hidden sm:block">
+                {item.author} {item.readingMinutes && `• ${item.readingMinutes} min`}
+              </p>
+              <p className="text-[10px] opacity-60 hidden md:block">
+                {Math.round(scrollProgress)}% lido
+              </p>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
@@ -319,9 +487,21 @@ export default function ReadPage() {
                   <li key={idx}>
                     <button
                       onClick={() => scrollToSection(idx)}
-                      className="w-full text-left px-3 py-2 rounded-md hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-sm"
+                      className={`w-full text-left px-3 py-2 rounded-md transition-colors text-sm ${
+                        idx === currentSection 
+                          ? 'bg-black/10 dark:bg-white/10 font-semibold' 
+                          : 'hover:bg-black/5 dark:hover:bg-white/5'
+                      }`}
                     >
-                      {section.heading || `Seção ${idx + 1}`}
+                      <div className="flex items-center gap-2">
+                        {idx === currentSection && (
+                          <div 
+                            className="w-1 h-4 rounded-full" 
+                            style={{ backgroundColor: currentTheme.secondary }}
+                          />
+                        )}
+                        <span>{section.heading || `Seção ${idx + 1}`}</span>
+                      </div>
                     </button>
                   </li>
                 ))}
@@ -392,7 +572,7 @@ export default function ReadPage() {
                   <div
                     className="prose prose-lg max-w-none"
                     style={{ color: currentTheme.text }}
-                    dangerouslySetInnerHTML={{ __html: section.contentHtml || '' }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.contentHtml || '') }}
                   />
                 </section>
               ))

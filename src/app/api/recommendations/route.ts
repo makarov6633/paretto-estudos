@@ -7,12 +7,27 @@ import {
 } from "@/lib/manual-fixes";
 import { desc, ilike, or, eq } from "drizzle-orm";
 import { computeEtag } from "@/lib/http";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 // Keep types inferred from DB; avoid forcing Item shape here
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || undefined;
+  const requestedUserId = searchParams.get("userId") || undefined;
   const limit = Number(searchParams.get("limit") ?? 12);
+
+  // Validate user authorization if userId is requested
+  let userId: string | undefined = requestedUserId;
+  if (requestedUserId) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    if (requestedUserId !== session.user.id) {
+      return NextResponse.json({ error: 'Forbidden: Cannot access other user preferences' }, { status: 403 });
+    }
+    userId = session.user.id;
+  }
 
   try {
     const withConditionalETag = (data: unknown, cacheCtl: string) => {

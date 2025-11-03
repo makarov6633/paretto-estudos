@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "@/lib/schema";
 import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
 
 const sectionSchema = z.object({
   id: z.string().optional(),
@@ -19,9 +20,8 @@ const itemSchema = z.object({
   title: z.string(),
   author: z.string(),
   language: z.string().default("pt-BR").optional(),
-  // Accept relative URLs too
-  coverImageUrl: z.string().optional(),
-  pdfUrl: z.string().optional(),
+  coverImageUrl: z.string().url().or(z.string().startsWith('/')).optional(),
+  pdfUrl: z.string().url().or(z.string().startsWith('/')).optional(),
   hasPdf: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
   readingMinutes: z.number().int().optional(),
@@ -100,23 +100,22 @@ export async function POST(req: Request) {
                 itemId: id,
                 orderIndex: s.orderIndex,
                 heading: s.heading,
-                contentHtml: s.contentHtml,
+                contentHtml: s.contentHtml ? DOMPurify.sanitize(s.contentHtml) : undefined,
               })),
             );
           }
 
           results.push({ slug: raw.slug, status: "imported" });
         } catch (e: unknown) {
-          const msg = e instanceof Error ? e.message : String(e);
+          const msg = e instanceof Error ? 'Import failed' : 'Unknown error';
           results.push({ slug: raw.slug, status: "failed", error: msg });
         }
       }
     });
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("admin/import transaction error", msg);
+    console.error("admin/import transaction error", e);
     return NextResponse.json(
-      { ok: false, results, error: msg },
+      { ok: false, results, error: 'Import transaction failed' },
       { status: 500 },
     );
   }
