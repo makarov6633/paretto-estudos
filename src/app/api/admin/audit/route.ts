@@ -9,9 +9,7 @@ type ItemLite = {
   author?: string;
   coverImageUrl?: string | null;
   hasPdf?: boolean;
-  hasAudio?: boolean;
   pdfUrl?: string | null;
-  audioTracks?: Array<{ audioUrl: string }> | null;
 };
 
 function normalizeTitle(s: unknown): string {
@@ -50,15 +48,11 @@ export async function GET(req: Request) {
 
   const coversDir = path.join(process.cwd(), "public", "media", "covers");
   const pdfDir = path.join(process.cwd(), "public", "media", "pdf");
-  const audioDir = path.join(process.cwd(), "public", "media", "audio");
   const covers = fs.existsSync(coversDir)
     ? new Set(fs.readdirSync(coversDir).map((f) => f.toLowerCase()))
     : new Set<string>();
   const pdfs = fs.existsSync(pdfDir)
     ? new Set(fs.readdirSync(pdfDir).map((f) => f.toLowerCase()))
-    : new Set<string>();
-  const audios = fs.existsSync(audioDir)
-    ? new Set(fs.readdirSync(audioDir).map((f) => f.toLowerCase()))
     : new Set<string>();
 
   const duplicates: Array<{ key: string; titles: string[]; slugs: string[] }> =
@@ -68,7 +62,6 @@ export async function GET(req: Request) {
   const missing = {
     cover: [] as string[],
     pdf: [] as string[],
-    audio: [] as string[],
   };
 
   for (const it of items) {
@@ -90,13 +83,6 @@ export async function GET(req: Request) {
       ? true
       : [...pdfs].some((f) => f.includes(slug) && f.endsWith(".pdf"));
     if (it.hasPdf && !pdfOk) missing.pdf.push(slug || it.title || "");
-
-    // Audio check
-    const audioOk =
-      it.audioTracks && it.audioTracks.length > 0
-        ? true
-        : [...audios].some((f) => f.includes(slug));
-    if (it.hasAudio && !audioOk) missing.audio.push(slug || it.title || "");
   }
 
   for (const [key, g] of seen.entries()) {
@@ -110,6 +96,5 @@ export async function GET(req: Request) {
     missing,
     coversCount: covers.size,
     pdfCount: pdfs.size,
-    audioCount: audios.size,
   });
 }

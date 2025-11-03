@@ -166,7 +166,7 @@ export default async function PlansPage() {
               <CardContent className="space-y-6 pt-6">
                 <div className="grid gap-4 text-sm text-muted-foreground sm:grid-cols-2">
                   <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] p-4">
-                    PDFs completos, audios premium e notas estruturadas.
+                    PDFs completos e notas estruturadas.
                   </div>
                   <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] p-4">
                     Checklists, quiz de retencao e integracao com ferramentas.

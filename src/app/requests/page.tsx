@@ -267,7 +267,7 @@ export default function RequestsPage() {
                     1. Avaliamos relevancia para a comunidade e disponibilidade de fontes confiaveis.
                   </p>
                   <p>
-                    2. Se aceito, o pedido segue para roteiro, gravacao de audio, sincronizacao e revisao.
+                    2. Se aceito, o pedido segue para roteiro, producao de conteudo e revisao.
                   </p>
                   <p>
                     3. Avisamos assim que o resumo entra no catalogo e liberamos notificacao para voce.
