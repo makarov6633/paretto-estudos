@@ -100,6 +100,8 @@ export default function ReadPage() {
   const [currentSection, setCurrentSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [progressRestored, setProgressRestored] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const { data: session } = useSession();
 
@@ -272,30 +274,56 @@ export default function ReadPage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [navigateToSection, showToc, showSettings, showShortcuts]);
 
-  // Track scroll progress
+  // Track scroll progress and auto-hide header
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      const winHeight = window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight - winHeight;
-      const scrolled = window.scrollY;
-      const progress = docHeight > 0 ? (scrolled / docHeight) * 100 : 0;
-      setScrollProgress(Math.min(100, Math.max(0, progress)));
-      
-      // Update current section based on scroll
-      const sections = item?.sections ?? [];
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = document.getElementById(`section-${i}`);
-        if (el && el.getBoundingClientRect().top <= 100) {
-          setCurrentSection(i);
-          break;
-        }
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const winHeight = window.innerHeight;
+          const docHeight = document.documentElement.scrollHeight - winHeight;
+          const scrolled = window.scrollY;
+          const progress = docHeight > 0 ? (scrolled / docHeight) * 100 : 0;
+          setScrollProgress(Math.min(100, Math.max(0, progress)));
+          
+          // Auto-hide header logic
+          const scrollingDown = scrolled > lastScrollY;
+          const scrolledPastThreshold = scrolled > 100;
+          
+          if (scrolledPastThreshold) {
+            if (scrollingDown && isHeaderVisible) {
+              setIsHeaderVisible(false);
+            } else if (!scrollingDown && !isHeaderVisible) {
+              setIsHeaderVisible(true);
+            }
+          } else {
+            setIsHeaderVisible(true);
+          }
+          
+          setLastScrollY(scrolled);
+          
+          // Update current section based on scroll
+          const sections = item?.sections ?? [];
+          for (let i = sections.length - 1; i >= 0; i--) {
+            const el = document.getElementById(`section-${i}`);
+            if (el && el.getBoundingClientRect().top <= 100) {
+              setCurrentSection(i);
+              break;
+            }
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
       }
     };
     
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial call
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [item]);
+  }, [item, lastScrollY, isHeaderVisible]);
 
   if (!item) {
     return (
@@ -361,10 +389,11 @@ export default function ReadPage() {
 
       {/* Header */}
       <header 
-        className="sticky top-0 z-50 border-b backdrop-blur-sm"
+        className="sticky top-0 z-50 border-b backdrop-blur-sm transition-transform duration-300 ease-in-out"
         style={{
           backgroundColor: `${currentTheme.bg}f0`,
           borderBottomColor: `${currentTheme.secondary}33`,
+          transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
         }}
       >
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
