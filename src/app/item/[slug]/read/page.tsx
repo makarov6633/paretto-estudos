@@ -10,12 +10,11 @@ import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
 
 type FullItem = Item & {
-  pdfUrl?: string | null;
   sections?: Array<{ 
     orderIndex: number; 
     heading?: string | null; 
     contentHtml?: string | null;
-  }>;
+  };
 };
 
 async function fetchItem(slug: string): Promise<FullItem | null> {
@@ -46,9 +45,6 @@ export default function ReadPage() {
   const [lineHeight, setLineHeight] = useState(1.6);
   const [maxWidth, setMaxWidth] = useState<'narrow' | 'medium' | 'wide' | 'full'>('medium');
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('sepia');
-  const [showPdf, setShowPdf] = useState(false);
-  const [pdfScale, setPdfScale] = useState(1.0);
-  const [pdfError, setPdfError] = useState(false);
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
@@ -309,24 +305,6 @@ export default function ReadPage() {
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
-              {item.pdfUrl && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setShowPdf(!showPdf);
-                    setPdfError(false);
-                  }}
-                  className="h-9 px-2 sm:px-3"
-                  aria-label={showPdf ? 'Ver texto' : 'Ver PDF'}
-                  title={showPdf ? 'Visualizar como texto' : 'Visualizar PDF original'}
-                >
-                  <BookOpen className="w-4 h-4" />
-                  <span className="hidden lg:inline ml-1.5 text-xs">
-                    {showPdf ? 'Texto' : 'PDF'}
-                  </span>
-                </Button>
-              )}
               <Button
                 size="sm"
                 variant="ghost"
@@ -521,60 +499,7 @@ export default function ReadPage() {
 
       {/* Main Content */}
       <main className="flex-1 pb-20">
-        {showPdf && item.pdfUrl ? (
-          <div className="container mx-auto px-4 py-8">
-            <div className="mb-4 flex items-center justify-center gap-3">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setPdfScale(Math.max(0.5, pdfScale - 0.1))}
-              >
-                Zoom -
-              </Button>
-              <span className="text-sm font-medium">{Math.round(pdfScale * 100)}%</span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setPdfScale(Math.min(2.0, pdfScale + 0.1))}
-              >
-                Zoom +
-              </Button>
-            </div>
-            <div className="flex justify-center">
-              {pdfError ? (
-                <div className="text-center py-20">
-                  <p className="text-lg font-medium mb-4">PDF não disponível</p>
-                  <p className="text-sm opacity-70 mb-6">O arquivo PDF não pôde ser carregado.</p>
-                  <Button
-                    onClick={() => {
-                      setShowPdf(false);
-                      setPdfError(false);
-                    }}
-                    variant="outline"
-                  >
-                    Ver texto do resumo
-                  </Button>
-                </div>
-              ) : (
-                <iframe
-                  src={item.pdfUrl}
-                  className="border rounded-lg shadow-lg"
-                  style={{
-                    width: `${100 * pdfScale}%`,
-                    height: `${800 * pdfScale}px`,
-                    maxWidth: '100%',
-                  }}
-                  title={`PDF: ${item.title}`}
-                  onError={() => {
-                    console.error('Failed to load PDF:', item.pdfUrl);
-                    setPdfError(true);
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        ) : (
-          <article 
+        <article 
             className="mx-auto px-4 sm:px-6 py-8 sm:py-12"
             style={{ 
               maxWidth: widthMap[maxWidth],
@@ -612,7 +537,6 @@ export default function ReadPage() {
               </div>
             )}
           </article>
-        )}
       </main>
 
       {/* Custom Styles */}
