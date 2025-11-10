@@ -1,5 +1,8 @@
 ﻿import { headers } from "next/headers";
 import { ItemCard } from "@/components/ItemCard";
+import { ContinueReading } from "@/components/ContinueReading";
+import { SearchBar } from "@/components/SearchBar";
+import { FilterPanel } from "@/components/FilterPanel";
 import type { Item } from "@/types";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -7,6 +10,8 @@ type SearchParams = Record<string, string | string[] | undefined>;
 async function ItemsList({ searchParams }: { searchParams: SearchParams }) {
   const q = typeof searchParams.q === "string" ? searchParams.q : undefined;
   const tag = typeof searchParams.tag === "string" ? searchParams.tag : undefined;
+  const minMinutes = typeof searchParams.minMinutes === "string" ? searchParams.minMinutes : undefined;
+  const maxMinutes = typeof searchParams.maxMinutes === "string" ? searchParams.maxMinutes : undefined;
   const hasPdf = typeof searchParams.read === "string" ? searchParams.read : undefined;
 
   const hdrs = await headers();
@@ -19,6 +24,8 @@ async function ItemsList({ searchParams }: { searchParams: SearchParams }) {
   const url = new URL("/api/items", origin);
   if (q) url.searchParams.set("q", q);
   if (tag) url.searchParams.set("tag", tag);
+  if (minMinutes) url.searchParams.set("minMinutes", minMinutes);
+  if (maxMinutes) url.searchParams.set("maxMinutes", maxMinutes);
   if (hasPdf === "1") url.searchParams.set("hasPdf", "1");
 
   const res = await fetch(url.toString(), { cache: "no-store" });
@@ -45,22 +52,17 @@ export default async function LibraryPage({
   return (
     <main className="page-shell">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <ContinueReading />
+        
         <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-end">
-          <form className="flex-1">
-            <input
-              type="text"
-              name="q"
-              defaultValue={typeof sp.q === "string" ? sp.q : ""}
-              placeholder="Encontre seu próximo título"
-              className="h-10 sm:h-11 w-full rounded-md border border-border bg-card px-3 sm:px-4 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary touch-manipulation"
-            />
-          </form>
-          <div className="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto pb-1">
-            <a href="/library?read=1" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
+          <SearchBar />
+          <div className="flex items-center gap-2">
+            <FilterPanel />
+            <a 
+              href="/library?read=1" 
+              className="rounded-md border border-border px-3 py-2 text-xs sm:text-sm transition-colors hover:bg-accent whitespace-nowrap touch-manipulation"
+            >
               Com PDF
-            </a>
-            <a href="/library" className="rounded-md border border-border px-3 py-2 transition-colors hover:bg-[color:var(--overlay-card)] whitespace-nowrap touch-manipulation">
-              Todos
             </a>
           </div>
         </div>

@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 
 // Keep brand headings on Inter; body font via next/font (Work Sans)
 const inter = Inter({
@@ -63,6 +64,7 @@ export default function RootLayout({
           <SiteHeader />
           {children}
           <SiteFooter />
+          <OnboardingModal />
         </ThemeProvider>
       </body>
     </html>

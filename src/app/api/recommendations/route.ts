@@ -5,7 +5,7 @@ import {
   applyManualCorrections,
   filterManualDuplicates,
 } from "@/lib/manual-fixes";
-import { desc, ilike, or, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { computeEtag } from "@/lib/http";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -89,8 +89,6 @@ export async function GET(req: Request) {
       );
     }
 
-    const ors = tags.map((t: string) => ilike(item.title, `%${t}%`));
-    const where = ors.length === 1 ? ors[0] : or(...ors);
     const rows = await db
       .select({
         id: item.id,
@@ -100,10 +98,23 @@ export async function GET(req: Request) {
         coverImageUrl: item.coverImageUrl,
         hasPdf: item.hasPdf,
         readingMinutes: item.readingMinutes,
+        tags: item.tags,
+        matchScore: sql<number>`
+          (SELECT COUNT(*) FROM jsonb_array_elements_text(${item.tags}) AS tag 
+           WHERE tag IN (${sql.join(tags.map(t => sql`${t}`), sql`, `)}))
+        `,
       })
       .from(item)
-      .where(where)
-      .orderBy(desc(item.createdAt))
+      .where(
+        sql`EXISTS (
+          SELECT 1 FROM jsonb_array_elements_text(${item.tags}) AS tag 
+          WHERE tag IN (${sql.join(tags.map(t => sql`${t}`), sql`, `)})
+        )`
+      )
+      .orderBy(
+        desc(sql`(SELECT COUNT(*) FROM jsonb_array_elements_text(${item.tags}) AS tag WHERE tag IN (${sql.join(tags.map(t => sql`${t}`), sql`, `)}))`),
+        desc(item.createdAt)
+      )
       .limit(limit);
     const proj = filterManualDuplicates(
       applyManualCorrections(

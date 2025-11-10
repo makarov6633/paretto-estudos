@@ -289,3 +289,23 @@ export const pointTransaction = pgTable("point_transaction", {
   referenceId: text("referenceId"), // ID of the quiz/checklist/note
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
+
+// Reading progress tracking
+export const readingProgress = pgTable(
+  "reading_progress",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    itemId: text("itemId")
+      .notNull()
+      .references(() => item.id, { onDelete: "cascade" }),
+    scrollProgress: integer("scrollProgress").notNull().default(0), // percentage 0-100
+    currentSectionIndex: integer("currentSectionIndex").notNull().default(0),
+    lastReadAt: timestamp("lastReadAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.itemId] }),
+  })
+);
