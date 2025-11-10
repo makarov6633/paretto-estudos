@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trophy, Flame, TrendingUp, BookOpen, Brain, CheckSquare, StickyNote, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 type UserStats = {
   userId: string;
@@ -46,11 +45,7 @@ export function ProgressDashboard() {
   const [loading, setLoading] = useState(true);
   const [unseenBadges, setUnseenBadges] = useState<Badge[]>([]);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const response = await fetch("/api/gamification/profile");
       const data = await response.json();
@@ -69,7 +64,11 @@ export function ProgressDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   const markBadgesSeen = async (badgeIds: string[]) => {
     try {
@@ -215,7 +214,7 @@ export function ProgressDashboard() {
           </p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {badges.map(({ badge, earnedAt }) => (
+            {badges.map(({ badge }) => (
               <div
                 key={badge.id}
                 className="border rounded-lg p-3 text-center hover:border-primary/50 transition-colors"

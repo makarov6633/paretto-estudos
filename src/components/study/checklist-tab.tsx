@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type ChecklistItem = {
@@ -32,11 +31,7 @@ export function ChecklistTab({ itemId }: ChecklistTabProps) {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchChecklists();
-  }, [itemId]);
-
-  const fetchChecklists = async () => {
+  const fetchChecklists = useCallback(async () => {
     try {
       const response = await fetch(`/api/checklist/${itemId}`);
       const data = await response.json();
@@ -47,7 +42,11 @@ export function ChecklistTab({ itemId }: ChecklistTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [itemId]);
+
+  useEffect(() => {
+    fetchChecklists();
+  }, [fetchChecklists]);
 
   const toggleChecklistItem = async (checklistId: string, currentStatus: boolean) => {
     setUpdating(checklistId);

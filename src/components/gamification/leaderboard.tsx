@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { Trophy, Flame, BookOpen, Brain, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,11 +22,7 @@ export function Leaderboard() {
   const [period, setPeriod] = useState<"all" | "month" | "week">("all");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLeaderboard();
-  }, [period]);
-
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(
@@ -38,7 +35,11 @@ export function Leaderboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [period]);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
 
   const getRankIcon = (index: number) => {
     switch (index) {
@@ -138,9 +139,11 @@ export function Leaderboard() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     {entry.userImage ? (
-                      <img
+                      <Image
                         src={entry.userImage}
                         alt={entry.userName}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full"
                       />
                     ) : (

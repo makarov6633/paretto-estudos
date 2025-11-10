@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Check, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -42,11 +42,7 @@ export function QuizTab({ itemId }: QuizTabProps) {
     explanation: string | null;
   } | null>(null);
 
-  useEffect(() => {
-    fetchQuiz();
-  }, [itemId]);
-
-  const fetchQuiz = async () => {
+  const fetchQuiz = useCallback(async () => {
     try {
       const response = await fetch(`/api/quiz/${itemId}`);
       const data = await response.json();
@@ -57,7 +53,11 @@ export function QuizTab({ itemId }: QuizTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [itemId]);
+
+  useEffect(() => {
+    fetchQuiz();
+  }, [fetchQuiz]);
 
   const submitAnswer = async () => {
     if (selectedOption === null) return;

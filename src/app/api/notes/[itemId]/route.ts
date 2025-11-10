@@ -90,6 +90,7 @@ export async function POST(
 
 export async function PUT(
   request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
@@ -135,6 +136,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {

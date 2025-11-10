@@ -43,6 +43,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
@@ -97,6 +98,7 @@ export async function POST(
       const created = await db
         .insert(userChecklistProgress)
         .values({
+          id: crypto.randomUUID(),
           userId: session.user.id,
           checklistId,
           completed,
