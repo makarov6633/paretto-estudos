@@ -294,16 +294,16 @@ export const pointTransaction = pgTable("point_transaction", {
 export const readingProgress = pgTable(
   "reading_progress",
   {
-    userId: text("userId")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    itemId: text("itemId")
+    itemId: text("item_id")
       .notNull()
       .references(() => item.id, { onDelete: "cascade" }),
-    scrollProgress: integer("scrollProgress").notNull().default(0), // percentage 0-100
-    currentSectionIndex: integer("currentSectionIndex").notNull().default(0),
-    lastReadAt: timestamp("lastReadAt").notNull().defaultNow(),
-    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+    scrollProgress: integer("scroll_progress").notNull().default(0), // percentage 0-100
+    currentSectionIndex: integer("current_section_index").notNull().default(0),
+    lastReadAt: timestamp("last_read_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.itemId] }),
