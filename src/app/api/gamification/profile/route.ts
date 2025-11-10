@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getUserGamification, getUserBadges, markBadgesSeen } from "@/lib/gamification";
-import { db } from "@/lib/db";
-import { pointTransaction } from "@/lib/schema";
-import { eq, desc } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -19,19 +16,12 @@ export async function GET() {
     const stats = await getUserGamification(session.user.id);
     const badges = await getUserBadges(session.user.id);
 
-    const recentTransactions = await db
-      .select()
-      .from(pointTransaction)
-      .where(eq(pointTransaction.userId, session.user.id))
-      .orderBy(desc(pointTransaction.createdAt))
-      .limit(20);
-
     const unseenBadges = badges.filter((b) => !b.seen);
 
     return NextResponse.json({
       stats,
       badges,
-      recentTransactions,
+      recentTransactions: [],
       unseenBadges,
     });
   } catch (error) {

@@ -282,8 +282,7 @@ export default function Home() {
                 Revisão e Memória
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Pontos de ação, checklists e quiz de retenção para fixação
-                rápida.
+                Resumos otimizados para revisão e fixação rápida do conteúdo.
               </p>
             </div>
           </article>
@@ -468,10 +467,6 @@ export default function Home() {
                   <li className="flex items-start gap-2 text-sm text-muted-foreground">
                     <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400" />{" "}
                     Explicações progressivas e glossário
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400" />{" "}
-                    Quiz de retenção e checklist final
                   </li>
                   <li className="flex items-start gap-2 text-sm text-muted-foreground">
                     <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 text-emerald-400" />{" "}

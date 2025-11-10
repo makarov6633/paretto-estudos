@@ -8,7 +8,7 @@ import { ChevronLeft, Type, BookOpen } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
-import { FloatingStudyTools } from "@/components/study/floating-study-tools";
+
 import { SimilarItems } from "@/components/SimilarItems";
 
 type FullItem = Item & {
@@ -685,14 +685,6 @@ export default function ReadPage() {
 
         {/* Similar Items Section */}
         <SimilarItems itemId={item.id} />
-
-      {/* Floating Study Tools */}
-      {item && (
-        <FloatingStudyTools 
-          itemId={item.id} 
-          theme={currentTheme}
-        />
-      )}
 
       {/* Keyboard Shortcuts */}
       {showShortcuts && (

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { Trophy, Flame, BookOpen, Brain, Crown } from "lucide-react";
+import { Trophy, Flame, BookOpen, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type LeaderboardEntry = {
@@ -13,7 +13,6 @@ type LeaderboardEntry = {
   currentStreak: number;
   longestStreak: number;
   level: number;
-  quizzesCompleted: number;
   itemsRead: number;
 };
 
@@ -164,13 +163,6 @@ export function Leaderboard() {
                       <Flame className="w-4 h-4 text-orange-600" />
                       <span className="font-semibold">{entry.currentStreak}</span>
                       <span className="text-muted-foreground">dias</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Brain className="w-4 h-4 text-purple-600" />
-                      <span className="font-semibold">
-                        {entry.quizzesCompleted}
-                      </span>
-                      <span className="text-muted-foreground">quizzes</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <BookOpen className="w-4 h-4 text-blue-600" />

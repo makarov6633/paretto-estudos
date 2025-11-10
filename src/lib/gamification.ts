@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import {
   userGamification,
-  pointTransaction,
   userBadge,
   badgeDefinition,
 } from "@/lib/schema";
@@ -28,9 +27,6 @@ export async function ensureUserGamification(userId: string) {
       longestStreak: 0,
       lastStudyDate: null,
       level: 1,
-      quizzesCompleted: 0,
-      checklistsCompleted: 0,
-      notesCreated: 0,
       itemsRead: 0,
       updatedAt: new Date(),
     });
@@ -44,15 +40,6 @@ export async function addPoints(
   referenceId?: string
 ) {
   await ensureUserGamification(userId);
-
-  await db.insert(pointTransaction).values({
-    id: nanoid(),
-    userId,
-    points,
-    reason,
-    referenceId: referenceId || null,
-    createdAt: new Date(),
-  });
 
   await db
     .update(userGamification)
@@ -132,7 +119,7 @@ export async function updateStreak(userId: string) {
 
 export async function incrementStat(
   userId: string,
-  stat: "quizzesCompleted" | "checklistsCompleted" | "notesCreated" | "itemsRead"
+  stat: "itemsRead"
 ) {
   await ensureUserGamification(userId);
 
@@ -183,15 +170,6 @@ async function checkAndAwardBadges(userId: string) {
       case "streak":
         qualified = stats.currentStreak >= req.value;
         break;
-      case "quizzes":
-        qualified = stats.quizzesCompleted >= req.value;
-        break;
-      case "checklistsCompleted":
-        qualified = stats.checklistsCompleted >= req.value;
-        break;
-      case "notesCreated":
-        qualified = stats.notesCreated >= req.value;
-        break;
       case "itemsRead":
         qualified = stats.itemsRead >= req.value;
         break;
@@ -206,15 +184,6 @@ async function checkAndAwardBadges(userId: string) {
       });
 
       if (badge.points > 0) {
-        await db.insert(pointTransaction).values({
-          id: nanoid(),
-          userId,
-          points: badge.points,
-          reason: `badge_${badge.id}`,
-          referenceId: badge.id,
-          createdAt: new Date(),
-        });
-
         await db
           .update(userGamification)
           .set({

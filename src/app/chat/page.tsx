@@ -189,7 +189,7 @@ export default function ChatPage() {
         <PageHero
           eyebrow="Assistente"
           title="Converse com o copiloto inspirado nos resumos Paretto"
-          description="Peca roteiros de estudo, revise ideias chaves ou gere checklist de aplicacao. A conversa considera seus resumos recentes." 
+          description="Peça roteiros de estudo, revise ideias chaves ou explore conceitos. A conversa considera seus resumos recentes." 
           stats={[
             { label: "Status", value: status === "streaming" ? "Respondendo" : "Pronto", helper: "Atualiza em tempo real" },
             { label: "Mensagens", value: `${messages.length}`, helper: "Historico local na sessao" },

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import {
-  studySession,
   userGamification,
   userBadge,
   badgeDefinition,
@@ -31,9 +30,6 @@ export async function GET(request: NextRequest) {
       currentStreak: 0,
       longestStreak: 0,
       level: 1,
-      quizzesCompleted: 0,
-      checklistsCompleted: 0,
-      notesCreated: 0,
       itemsRead: 0,
     };
 
@@ -56,17 +52,7 @@ export async function GET(request: NextRequest) {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const studyTime = await db
-      .select({
-        totalMinutes: sql<number>`COALESCE(SUM(${studySession.duration}), 0) / 60`,
-      })
-      .from(studySession)
-      .where(
-        and(
-          eq(studySession.userId, userId),
-          gte(studySession.createdAt, thirtyDaysAgo)
-        )
-      );
+    const studyTime = [{ totalMinutes: 0 }];
 
     const categoriesRead = await db
       .select({
@@ -91,27 +77,10 @@ export async function GET(request: NextRequest) {
       return date.toISOString().split("T")[0];
     }).reverse();
 
-    const dailyStudy = await db
-      .select({
-        date: sql<string>`DATE(${studySession.createdAt})`,
-        minutes: sql<number>`SUM(${studySession.duration}) / 60`,
-      })
-      .from(studySession)
-      .where(
-        and(
-          eq(studySession.userId, userId),
-          gte(studySession.createdAt, new Date(last7Days[0]))
-        )
-      )
-      .groupBy(sql`DATE(${studySession.createdAt})`);
-
-    const studyByDay = last7Days.map((date) => {
-      const found = dailyStudy.find((d) => d.date === date);
-      return {
-        date,
-        minutes: found ? Math.round(found.minutes) : 0,
-      };
-    });
+    const studyByDay = last7Days.map((date) => ({
+      date,
+      minutes: 0,
+    }));
 
     const recommendedItems = await db
       .select({

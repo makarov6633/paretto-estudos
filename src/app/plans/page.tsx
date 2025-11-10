@@ -169,7 +169,7 @@ export default async function PlansPage() {
                     PDFs completos e notas estruturadas.
                   </div>
                   <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] p-4">
-                    Checklists, quiz de retencao e integracao com ferramentas.
+                    Integração com ferramentas e funcionalidades avançadas.
                   </div>
                   <div className="rounded-2xl border border-border bg-[color:var(--overlay-card)] p-4">
                     Atualizacoes semanais com novas obras e series exclusivas.
