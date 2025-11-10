@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckSquare, Brain, NotebookPen, X, Sparkles, ChevronRight } from "lucide-react";
+import { Circle, Lightbulb, BookOpen, X, Plus, ChevronRight } from "lucide-react";
 import { ChecklistTab } from "./checklist-tab";
 import { QuizTab } from "./quiz-tab";
 import { NotesTab } from "./notes-tab";
@@ -54,30 +54,30 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
   const tools = [
     {
       id: 'checklist' as const,
-      icon: CheckSquare,
+      icon: Circle,
       label: 'Checklist',
       description: 'Acompanhe seu progresso',
-      gradient: 'from-emerald-500 to-teal-600',
-      color: '#10b981',
+      gradient: 'from-green-500 to-emerald-600',
+      color: '#34C759',
       lightColor: '#d1fae5',
     },
     {
       id: 'quiz' as const,
-      icon: Brain,
+      icon: Lightbulb,
       label: 'Quiz',
       description: 'Teste seus conhecimentos',
-      gradient: 'from-violet-500 to-purple-600',
-      color: '#8b5cf6',
+      gradient: 'from-purple-500 to-indigo-600',
+      color: '#AF52DE',
       lightColor: '#ede9fe',
     },
     {
       id: 'notes' as const,
-      icon: NotebookPen,
+      icon: BookOpen,
       label: 'Notas',
       description: 'Anote suas reflexões',
-      gradient: 'from-sky-500 to-blue-600',
-      color: '#0ea5e9',
-      lightColor: '#e0f2fe',
+      gradient: 'from-amber-400 to-orange-500',
+      color: '#FFCC00',
+      lightColor: '#fef3c7',
     },
   ];
 
@@ -199,11 +199,11 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
           }`}
           style={{
             background: isOpen || activeTool 
-              ? `linear-gradient(135deg, ${theme.secondary}ee 0%, ${theme.secondary}cc 100%)`
-              : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              ? `linear-gradient(180deg, ${theme.secondary}ee 0%, ${theme.secondary}cc 100%)`
+              : 'linear-gradient(180deg, #007AFF 0%, #0051D5 100%)',
             boxShadow: isMobile 
-              ? '0 12px 40px -8px rgba(59, 130, 246, 0.6), 0 4px 16px -2px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)'
-              : '0 16px 56px -12px rgba(59, 130, 246, 0.6), 0 8px 24px -4px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)',
+              ? '0 4px 12px rgba(0, 122, 255, 0.4), 0 2px 4px rgba(0, 122, 255, 0.25), 0 0 0 0.5px rgba(255, 255, 255, 0.1)'
+              : '0 8px 24px rgba(0, 122, 255, 0.4), 0 4px 8px rgba(0, 122, 255, 0.25), 0 0 0 0.5px rgba(255, 255, 255, 0.1)',
             transform: isOpen ? 'rotate(45deg)' : activeTool ? 'rotate(180deg)' : 'rotate(0deg)',
             minWidth: '48px',
             minHeight: '48px',
@@ -222,7 +222,7 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
           {activeTool ? (
             <X className={`text-white relative z-10 transition-transform duration-300 ${isMobile ? 'w-6 h-6' : 'w-7 h-7'}`} strokeWidth={2.5} />
           ) : (
-            <Sparkles className={`text-white relative z-10 transition-transform duration-300 ${isMobile ? 'w-6 h-6' : 'w-7 h-7'}`} strokeWidth={2.5} />
+            <Plus className={`text-white relative z-10 transition-transform duration-300 ${isMobile ? 'w-6 h-6' : 'w-7 h-7'}`} strokeWidth={2.5} />
           )}
           
           {/* Pulse animation when closed (reduced on mobile) */}
@@ -276,9 +276,9 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
                         tools.find(t => t.id === activeTool)?.gradient || 'from-blue-500 to-blue-600'
                       } ${isMobile ? 'w-10 h-10 rounded-lg' : 'w-12 h-12 rounded-xl'}`}
                     >
-                      {activeTool === 'checklist' && <CheckSquare className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
-                      {activeTool === 'quiz' && <Brain className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
-                      {activeTool === 'notes' && <NotebookPen className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
+                      {activeTool === 'checklist' && <Circle className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
+                      {activeTool === 'quiz' && <Lightbulb className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
+                      {activeTool === 'notes' && <BookOpen className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
                     </div>
                     
                     <div>

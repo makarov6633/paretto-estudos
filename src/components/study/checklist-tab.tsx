@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Circle, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ChecklistItem = {
@@ -89,41 +89,44 @@ export function ChecklistTab({ itemId }: ChecklistTabProps) {
 
   if (checklists.length === 0 && !loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-muted-foreground mb-2">Nenhum checklist disponível</p>
-        <p className="text-sm text-muted-foreground">
-          Checklists ajudam você a acompanhar seu progresso de estudo
+      <div className="checklist-empty">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-900/40 dark:to-emerald-900/40 flex items-center justify-center mb-4">
+          <Circle className="w-8 h-8 text-green-500 dark:text-green-400" strokeWidth={1.5} />
+        </div>
+        <p className="text-base font-medium text-gray-900 dark:text-gray-100 mb-1">Nenhum checklist disponível</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Checklists ajudam você a acompanhar seu progresso
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-sm font-medium">
-          <span>Progresso Geral</span>
-          <span className="text-emerald-600 dark:text-emerald-400">
+    <div className="checklist-container">
+      {/* Progress Header */}
+      <div className="checklist-progress-header">
+        <div className="flex items-center justify-between mb-2">
+          <span className="checklist-progress-label">Progresso Geral</span>
+          <span className="checklist-progress-value">
             {completedCount} de {totalCount}
           </span>
         </div>
-        <div className="relative h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+        <div className="checklist-progress-track">
           <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-700 ease-out rounded-full"
+            className="checklist-progress-fill"
             style={{ width: `${progressPercent}%` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 animate-shimmer" />
-          </div>
+          />
         </div>
         {totalCount > 0 && (
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="checklist-progress-text">
             {progressPercent === 100 ? '✨ Completo!' : `${Math.round(progressPercent)}% concluído`}
           </p>
         )}
       </div>
 
-      <div className="space-y-2.5">
-        {checklists.map((item) => {
+      {/* Checklist Items */}
+      <div className="checklist-items">
+        {checklists.map((item, index) => {
           const completed = isCompleted(item.id);
           const isUpdating = updating === item.id;
 
@@ -133,39 +136,30 @@ export function ChecklistTab({ itemId }: ChecklistTabProps) {
               onClick={() => toggleChecklistItem(item.id, completed)}
               disabled={isUpdating}
               className={cn(
-                "group w-full text-left rounded-xl border-2 transition-all duration-300",
-                "hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/10",
-                "focus:outline-none focus:ring-2 focus:ring-emerald-500/20",
-                "active:scale-[0.98]",
-                completed && "bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/30 dark:to-teal-950/30 border-emerald-300 dark:border-emerald-700",
-                !completed && "border-gray-200 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-900/50",
-                isUpdating && "opacity-60 cursor-wait",
-                "p-4 sm:p-4 min-h-[60px]" // Mobile touch optimization
+                "checklist-item",
+                completed && "checklist-item-completed",
+                isUpdating && "checklist-item-updating"
               )}
+              style={{
+                animationDelay: `${index * 40}ms`,
+              }}
             >
-              <div className="flex items-start gap-3">
-                <div
-                  className={cn(
-                    "flex-shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-300",
-                    completed
-                      ? "bg-gradient-to-br from-emerald-500 to-teal-600 border-transparent shadow-md shadow-emerald-500/30"
-                      : "border-gray-300 dark:border-gray-700 group-hover:border-emerald-400 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/30"
-                  )}
-                >
+              <div className="flex items-start gap-3 w-full">
+                <div className={cn(
+                  "checklist-checkbox",
+                  completed && "checklist-checkbox-checked"
+                )}>
                   {completed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4
-                    className={cn(
-                      "font-semibold mb-1 transition-all duration-300",
-                      completed && "line-through text-muted-foreground",
-                      !completed && "text-gray-900 dark:text-gray-100"
-                    )}
-                  >
+                  <h4 className={cn(
+                    "checklist-item-title",
+                    completed && "checklist-item-title-completed"
+                  )}>
                     {item.title}
                   </h4>
                   {item.description && (
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                    <p className="checklist-item-description">{item.description}</p>
                   )}
                 </div>
               </div>
@@ -174,20 +168,281 @@ export function ChecklistTab({ itemId }: ChecklistTabProps) {
         })}
       </div>
 
+      {/* Completion Celebration */}
       {completedCount === totalCount && totalCount > 0 && (
-        <div className="relative p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800 rounded-2xl text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-tr from-white/50 to-transparent pointer-events-none" />
-          <div className="relative">
-            <div className="text-4xl mb-2">🎉</div>
-            <p className="font-bold text-lg text-emerald-700 dark:text-emerald-300 mb-1">
-              Checklist Completo!
-            </p>
-            <p className="text-sm text-emerald-600 dark:text-emerald-400">
-              Você concluiu todos os {totalCount} itens deste resumo
-            </p>
+        <div className="checklist-complete">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-3">
+            <Trophy className="w-7 h-7 text-white" strokeWidth={2} />
           </div>
+          <p className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-1">
+            Checklist Completo!
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Você concluiu todos os {totalCount} itens deste resumo
+          </p>
         </div>
       )}
+
+      <style jsx>{`
+        .checklist-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .checklist-empty {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 4rem 1.5rem;
+          text-align: center;
+        }
+
+        .checklist-progress-header {
+          padding-bottom: 1rem;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .dark .checklist-progress-header {
+          border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .checklist-progress-label {
+          font-size: 0.6875rem;
+          font-weight: 500;
+          color: rgba(60, 60, 67, 0.6);
+          letter-spacing: -0.01em;
+          text-transform: uppercase;
+        }
+
+        .dark .checklist-progress-label {
+          color: rgba(235, 235, 245, 0.6);
+        }
+
+        .checklist-progress-value {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #34C759;
+          letter-spacing: -0.01em;
+        }
+
+        .dark .checklist-progress-value {
+          color: #30D158;
+        }
+
+        .checklist-progress-track {
+          height: 0.375rem;
+          background: rgba(120, 120, 128, 0.12);
+          border-radius: 0.1875rem;
+          overflow: hidden;
+          margin-top: 0.5rem;
+        }
+
+        .dark .checklist-progress-track {
+          background: rgba(235, 235, 245, 0.12);
+        }
+
+        .checklist-progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #34C759 0%, #30A14E 100%);
+          border-radius: 0.1875rem;
+          transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+        }
+
+        .checklist-progress-fill::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+          animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+
+        .checklist-progress-text {
+          font-size: 0.75rem;
+          color: rgba(60, 60, 67, 0.6);
+          text-align: center;
+          margin-top: 0.5rem;
+          letter-spacing: -0.01em;
+        }
+
+        .dark .checklist-progress-text {
+          color: rgba(235, 235, 245, 0.6);
+        }
+
+        .checklist-items {
+          display: flex;
+          flex-direction: column;
+          gap: 0.625rem;
+        }
+
+        .checklist-item {
+          width: 100%;
+          text-align: left;
+          padding: 1rem 1.125rem;
+          background: rgba(255, 255, 255, 0.6);
+          border: 1.5px solid rgba(0, 0, 0, 0.08);
+          border-radius: 0.875rem;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+          min-height: 3.75rem;
+          animation: checklistSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+        }
+
+        .dark .checklist-item {
+          background: rgba(28, 28, 30, 0.6);
+          border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .checklist-item:hover:not(.checklist-item-updating) {
+          background: rgba(255, 255, 255, 0.9);
+          border-color: rgba(52, 199, 89, 0.3);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+          transform: translateY(-1px);
+        }
+
+        .dark .checklist-item:hover:not(.checklist-item-updating) {
+          background: rgba(28, 28, 30, 0.9);
+          border-color: rgba(48, 209, 88, 0.4);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .checklist-item:active:not(.checklist-item-updating) {
+          transform: scale(0.99);
+        }
+
+        .checklist-item-completed {
+          background: rgba(52, 199, 89, 0.08);
+          border-color: rgba(52, 199, 89, 0.3);
+        }
+
+        .dark .checklist-item-completed {
+          background: rgba(48, 209, 88, 0.12);
+          border-color: rgba(48, 209, 88, 0.35);
+        }
+
+        .checklist-item-updating {
+          opacity: 0.6;
+          cursor: wait;
+        }
+
+        @keyframes checklistSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .checklist-checkbox {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.5rem;
+          height: 1.5rem;
+          border-radius: 50%;
+          border: 1.5px solid rgba(120, 120, 128, 0.3);
+          background: transparent;
+          flex-shrink: 0;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark .checklist-checkbox {
+          border-color: rgba(235, 235, 245, 0.3);
+        }
+
+        .checklist-checkbox-checked {
+          border-color: #34C759;
+          background: linear-gradient(135deg, #34C759 0%, #30A14E 100%);
+          box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+        }
+
+        .dark .checklist-checkbox-checked {
+          background: linear-gradient(135deg, #30D158 0%, #32D74B 100%);
+        }
+
+        .checklist-item-title {
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+          font-size: 0.9375rem;
+          line-height: 1.4;
+          font-weight: 500;
+          color: #1d1d1f;
+          letter-spacing: -0.01em;
+          margin-bottom: 0.25rem;
+          transition: all 0.25s ease;
+        }
+
+        .dark .checklist-item-title {
+          color: #f5f5f7;
+        }
+
+        .checklist-item-title-completed {
+          text-decoration: line-through;
+          color: rgba(60, 60, 67, 0.5);
+        }
+
+        .dark .checklist-item-title-completed {
+          color: rgba(235, 235, 245, 0.5);
+        }
+
+        .checklist-item-description {
+          font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+          font-size: 0.8125rem;
+          line-height: 1.4;
+          color: rgba(60, 60, 67, 0.6);
+          letter-spacing: -0.01em;
+        }
+
+        .dark .checklist-item-description {
+          color: rgba(235, 235, 245, 0.6);
+        }
+
+        .checklist-complete {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 2rem 1.5rem;
+          background: linear-gradient(to bottom,
+            rgba(52, 199, 89, 0.08) 0%,
+            rgba(48, 161, 78, 0.08) 100%
+          );
+          border: 1px solid rgba(52, 199, 89, 0.2);
+          border-radius: 1rem;
+          text-align: center;
+          animation: celebrationBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .dark .checklist-complete {
+          background: linear-gradient(to bottom,
+            rgba(48, 209, 88, 0.1) 0%,
+            rgba(50, 215, 75, 0.1) 100%
+          );
+          border-color: rgba(48, 209, 88, 0.25);
+        }
+
+        @keyframes celebrationBounce {
+          0% {
+            opacity: 0;
+            transform: scale(0.9) translateY(10px);
+          }
+          50% {
+            transform: scale(1.02);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }
