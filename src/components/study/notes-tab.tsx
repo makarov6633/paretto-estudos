@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 
 type UserNote = {
   id: string;
@@ -30,11 +29,7 @@ export function NotesTab({ itemId }: NotesTabProps) {
   const [newNoteContent, setNewNoteContent] = useState("");
   const [editContent, setEditContent] = useState("");
 
-  useEffect(() => {
-    fetchNotes();
-  }, [itemId]);
-
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     try {
       const response = await fetch(`/api/notes/${itemId}`);
       const data = await response.json();
@@ -44,7 +39,11 @@ export function NotesTab({ itemId }: NotesTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [itemId]);
+
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
 
   const createNote = async () => {
     if (!newNoteContent.trim()) return;

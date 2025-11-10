@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { quizQuestion, quizAnswer } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { addPoints, updateStreak, incrementStat } from "@/lib/gamification";
@@ -44,6 +44,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {

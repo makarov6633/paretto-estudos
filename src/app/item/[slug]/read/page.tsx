@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import type { Item } from "@/types";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Maximize2, Minimize2, Type, BookOpen, CheckSquare, Brain, StickyNote } from "lucide-react";
+import { ChevronLeft, Type, BookOpen, CheckSquare, Brain, StickyNote } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
@@ -41,6 +41,13 @@ async function fetchItem(slug: string): Promise<FullItem | null> {
   }
 }
 
+const readerPrefsSchema = z.object({
+  fontSize: z.number().min(12).max(32).optional(),
+  lineHeight: z.number().min(1.0).max(2.4).optional(),
+  maxWidth: z.enum(['narrow', 'medium', 'wide', 'full']).optional(),
+  theme: z.enum(['light', 'sepia', 'dark']).optional(),
+});
+
 export default function ReadPage() {
   const { slug } = useParams<{ slug: string }>();
   const [item, setItem] = useState<FullItem | null>(null);
@@ -53,14 +60,7 @@ export default function ReadPage() {
   const [currentSection, setCurrentSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeStudyTab, setActiveStudyTab] = useState<'checklist' | 'quiz' | 'notes'>('checklist');
-  const { data: session } = useSession();
-
-  const readerPrefsSchema = z.object({
-    fontSize: z.number().min(12).max(32).optional(),
-    lineHeight: z.number().min(1.0).max(2.4).optional(),
-    maxWidth: z.enum(['narrow', 'medium', 'wide', 'full']).optional(),
-    theme: z.enum(['light', 'sepia', 'dark']).optional(),
-  });
+  useSession();
 
   useEffect(() => {
     if (!slug) return;
@@ -80,7 +80,7 @@ export default function ReadPage() {
           if (prefs.maxWidth) setMaxWidth(prefs.maxWidth);
           if (prefs.theme) setTheme(prefs.theme);
         }
-      } catch (e) {
+      } catch {
         console.warn('Invalid reader preferences');
         localStorage.removeItem('reader-preferences');
       }
@@ -399,7 +399,7 @@ export default function ReadPage() {
                 <label className="text-xs font-medium opacity-70 block mb-2">Largura</label>
                 <select
                   value={maxWidth}
-                  onChange={(e) => setMaxWidth(e.target.value as any)}
+                  onChange={(e) => setMaxWidth(e.target.value as 'narrow' | 'medium' | 'wide' | 'full')}
                   className="w-full h-9 px-3 rounded-md border text-sm"
                   style={{
                     backgroundColor: currentTheme.bg,
