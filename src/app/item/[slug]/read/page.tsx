@@ -4,10 +4,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import type { Item } from "@/types";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Maximize2, Minimize2, Type, BookOpen } from "lucide-react";
+import { ChevronLeft, Maximize2, Minimize2, Type, BookOpen, CheckSquare, Brain, StickyNote } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
+import { ChecklistTab } from "@/components/study/checklist-tab";
+import { QuizTab } from "@/components/study/quiz-tab";
+import { NotesTab } from "@/components/study/notes-tab";
 
 type FullItem = Item & {
   sections?: Array<{ 
@@ -49,6 +52,7 @@ export default function ReadPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeStudyTab, setActiveStudyTab] = useState<'checklist' | 'quiz' | 'notes'>('checklist');
   const { data: session } = useSession();
 
   const readerPrefsSchema = z.object({
@@ -539,6 +543,82 @@ export default function ReadPage() {
               </div>
             )}
           </article>
+
+          {/* Study Tools Section */}
+          {item && (
+            <div 
+              className="border-t mt-12"
+              style={{ borderTopColor: `${currentTheme.secondary}33` }}
+            >
+              <div 
+                className="mx-auto px-4 sm:px-6 py-8"
+                style={{ maxWidth: widthMap[maxWidth] }}
+              >
+                <h2 
+                  className="text-xl sm:text-2xl font-bold mb-6"
+                  style={{ color: currentTheme.text }}
+                >
+                  Ferramentas de Estudo
+                </h2>
+
+                {/* Tabs */}
+                <div className="flex gap-2 mb-6 flex-wrap">
+                  <Button
+                    onClick={() => setActiveStudyTab('checklist')}
+                    variant={activeStudyTab === 'checklist' ? 'default' : 'outline'}
+                    className="flex-1 sm:flex-none"
+                    style={{
+                      backgroundColor: activeStudyTab === 'checklist' ? currentTheme.secondary : 'transparent',
+                      color: activeStudyTab === 'checklist' ? currentTheme.bg : currentTheme.text,
+                      borderColor: `${currentTheme.secondary}44`,
+                    }}
+                  >
+                    <CheckSquare className="w-4 h-4 mr-2" />
+                    Checklist
+                  </Button>
+                  <Button
+                    onClick={() => setActiveStudyTab('quiz')}
+                    variant={activeStudyTab === 'quiz' ? 'default' : 'outline'}
+                    className="flex-1 sm:flex-none"
+                    style={{
+                      backgroundColor: activeStudyTab === 'quiz' ? currentTheme.secondary : 'transparent',
+                      color: activeStudyTab === 'quiz' ? currentTheme.bg : currentTheme.text,
+                      borderColor: `${currentTheme.secondary}44`,
+                    }}
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    Quiz
+                  </Button>
+                  <Button
+                    onClick={() => setActiveStudyTab('notes')}
+                    variant={activeStudyTab === 'notes' ? 'default' : 'outline'}
+                    className="flex-1 sm:flex-none"
+                    style={{
+                      backgroundColor: activeStudyTab === 'notes' ? currentTheme.secondary : 'transparent',
+                      color: activeStudyTab === 'notes' ? currentTheme.bg : currentTheme.text,
+                      borderColor: `${currentTheme.secondary}44`,
+                    }}
+                  >
+                    <StickyNote className="w-4 h-4 mr-2" />
+                    Notas
+                  </Button>
+                </div>
+
+                {/* Tab Content */}
+                <div 
+                  className="rounded-lg border p-4 sm:p-6"
+                  style={{
+                    backgroundColor: `${currentTheme.bg}88`,
+                    borderColor: `${currentTheme.secondary}33`,
+                  }}
+                >
+                  {activeStudyTab === 'checklist' && <ChecklistTab itemId={item.id} />}
+                  {activeStudyTab === 'quiz' && <QuizTab itemId={item.id} />}
+                  {activeStudyTab === 'notes' && <NotesTab itemId={item.id} />}
+                </div>
+              </div>
+            </div>
+          )}
       </main>
 
       {/* Custom Styles */}
