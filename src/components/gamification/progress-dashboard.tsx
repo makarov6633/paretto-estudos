@@ -10,9 +10,6 @@ type UserStats = {
   longestStreak: number;
   lastStudyDate: Date | null;
   level: number;
-  quizzesCompleted: number;
-  checklistsCompleted: number;
-  notesCreated: number;
   itemsRead: number;
   updatedAt: Date;
 };
@@ -162,37 +159,10 @@ export function ProgressDashboard() {
 
         <div className="bg-card border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Brain className="w-5 h-5 text-purple-600" />
-            <span className="text-sm text-muted-foreground">Quizzes</span>
-          </div>
-          <p className="text-2xl font-bold">{stats.quizzesCompleted}</p>
-        </div>
-
-        <div className="bg-card border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-2">
             <BookOpen className="w-5 h-5 text-blue-600" />
             <span className="text-sm text-muted-foreground">Resumos</span>
           </div>
           <p className="text-2xl font-bold">{stats.itemsRead}</p>
-        </div>
-      </div>
-
-      {/* Additional Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-card border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckSquare className="w-5 h-5 text-green-600" />
-            <span className="text-sm text-muted-foreground">Checklists</span>
-          </div>
-          <p className="text-xl font-bold">{stats.checklistsCompleted}</p>
-        </div>
-
-        <div className="bg-card border rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <StickyNote className="w-5 h-5 text-pink-600" />
-            <span className="text-sm text-muted-foreground">Notas</span>
-          </div>
-          <p className="text-xl font-bold">{stats.notesCreated}</p>
         </div>
       </div>
 

@@ -8,7 +8,6 @@ import { ChevronLeft, Type, BookOpen } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
-import { FloatingStudyTools } from "@/components/study/floating-study-tools";
 import { SimilarItems } from "@/components/SimilarItems";
 
 type FullItem = Item & {
@@ -91,8 +90,8 @@ const readerPrefsSchema = z.object({
 export default function ReadPage() {
   const { slug } = useParams<{ slug: string }>();
   const [item, setItem] = useState<FullItem | null>(null);
-  const [fontSize, setFontSize] = useState(16);
-  const [lineHeight, setLineHeight] = useState(1.5);
+  const [fontSize, setFontSize] = useState(19);
+  const [lineHeight, setLineHeight] = useState(1.75);
   const [maxWidth, setMaxWidth] = useState<'narrow' | 'medium' | 'wide' | 'full'>('medium');
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark' | 'high-contrast'>('dark');
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -101,6 +100,8 @@ export default function ReadPage() {
   const [currentSection, setCurrentSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [progressRestored, setProgressRestored] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const { data: session } = useSession();
 
@@ -273,30 +274,56 @@ export default function ReadPage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [navigateToSection, showToc, showSettings, showShortcuts]);
 
-  // Track scroll progress
+  // Track scroll progress and auto-hide header
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      const winHeight = window.innerHeight;
-      const docHeight = document.documentElement.scrollHeight - winHeight;
-      const scrolled = window.scrollY;
-      const progress = docHeight > 0 ? (scrolled / docHeight) * 100 : 0;
-      setScrollProgress(Math.min(100, Math.max(0, progress)));
-      
-      // Update current section based on scroll
-      const sections = item?.sections ?? [];
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = document.getElementById(`section-${i}`);
-        if (el && el.getBoundingClientRect().top <= 100) {
-          setCurrentSection(i);
-          break;
-        }
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const winHeight = window.innerHeight;
+          const docHeight = document.documentElement.scrollHeight - winHeight;
+          const scrolled = window.scrollY;
+          const progress = docHeight > 0 ? (scrolled / docHeight) * 100 : 0;
+          setScrollProgress(Math.min(100, Math.max(0, progress)));
+          
+          // Auto-hide header logic
+          const scrollingDown = scrolled > lastScrollY;
+          const scrolledPastThreshold = scrolled > 100;
+          
+          if (scrolledPastThreshold) {
+            if (scrollingDown && isHeaderVisible) {
+              setIsHeaderVisible(false);
+            } else if (!scrollingDown && !isHeaderVisible) {
+              setIsHeaderVisible(true);
+            }
+          } else {
+            setIsHeaderVisible(true);
+          }
+          
+          setLastScrollY(scrolled);
+          
+          // Update current section based on scroll
+          const sections = item?.sections ?? [];
+          for (let i = sections.length - 1; i >= 0; i--) {
+            const el = document.getElementById(`section-${i}`);
+            if (el && el.getBoundingClientRect().top <= 100) {
+              setCurrentSection(i);
+              break;
+            }
+          }
+          
+          ticking = false;
+        });
+        
+        ticking = true;
       }
     };
     
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Initial call
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [item]);
+  }, [item, lastScrollY, isHeaderVisible]);
 
   if (!item) {
     return (
@@ -334,9 +361,9 @@ export default function ReadPage() {
   };
 
   const widthMap = {
-    narrow: '560px',
+    narrow: '600px',
     medium: '680px',
-    wide: '860px',
+    wide: '800px',
     full: '100%',
   };
 
@@ -352,20 +379,21 @@ export default function ReadPage() {
     >
       {/* Progress Bar */}
       <div 
-        className="fixed top-0 left-0 right-0 h-1 z-[60] transition-all"
+        className="fixed top-0 left-0 right-0 h-1.5 z-[60] transition-all shadow-sm"
         style={{
           width: `${scrollProgress}%`,
           backgroundColor: currentTheme.secondary,
-          opacity: 0.6,
+          boxShadow: `0 0 8px ${currentTheme.secondary}80`,
         }}
       />
 
       {/* Header */}
       <header 
-        className="sticky top-0 z-50 border-b backdrop-blur-sm"
+        className="sticky top-0 z-50 border-b backdrop-blur-sm transition-transform duration-300 ease-in-out"
         style={{
           backgroundColor: `${currentTheme.bg}f0`,
           borderBottomColor: `${currentTheme.secondary}33`,
+          transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
         }}
       >
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -581,16 +609,9 @@ export default function ReadPage() {
           }}
         >
           <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Índice</h2>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowToc(false)}
-                className="h-8 px-2"
-              >
-                ✕
-              </Button>
+            <div className="flex items-center gap-2 mb-6">
+              <BookOpen className="w-5 h-5 opacity-80" />
+              <h2 className="text-sm font-semibold uppercase tracking-wide opacity-80">Ideias-chave</h2>
             </div>
             <nav>
               <ul className="space-y-1">
@@ -598,20 +619,32 @@ export default function ReadPage() {
                   <li key={idx}>
                     <button
                       onClick={() => scrollToSection(idx)}
-                      className={`w-full text-left px-3 py-2 rounded-md transition-colors text-sm ${
+                      className={`w-full text-left px-4 py-3 rounded-lg transition-all text-sm border ${
                         idx === currentSection 
-                          ? 'bg-black/10 dark:bg-white/10 font-semibold' 
-                          : 'hover:bg-black/5 dark:hover:bg-white/5'
+                          ? 'font-medium shadow-sm' 
+                          : 'border-transparent hover:border-opacity-20'
                       }`}
+                      style={{
+                        backgroundColor: idx === currentSection ? `${currentTheme.secondary}15` : 'transparent',
+                        borderColor: idx === currentSection ? `${currentTheme.secondary}40` : 'transparent',
+                      }}
                     >
-                      <div className="flex items-center gap-2">
-                        {idx === currentSection && (
-                          <div 
-                            className="w-1 h-4 rounded-full" 
-                            style={{ backgroundColor: currentTheme.secondary }}
-                          />
-                        )}
-                        <span>{section.heading || `Seção ${idx + 1}`}</span>
+                      <div className="flex items-start gap-3">
+                        <span 
+                          className="text-base font-bold mt-0.5 flex-shrink-0 w-6"
+                          style={{ 
+                            color: idx === currentSection ? currentTheme.text : currentTheme.secondary,
+                            opacity: idx === currentSection ? 1 : 0.6,
+                          }}
+                        >
+                          {idx + 1}
+                        </span>
+                        <span 
+                          className="line-clamp-2 leading-snug"
+                          style={{ opacity: idx === currentSection ? 1 : 0.85 }}
+                        >
+                          {section.heading || `Seção ${idx + 1}`}
+                        </span>
                       </div>
                     </button>
                   </li>
@@ -686,14 +719,6 @@ export default function ReadPage() {
         {/* Similar Items Section */}
         <SimilarItems itemId={item.id} />
 
-      {/* Floating Study Tools */}
-      {item && (
-        <FloatingStudyTools 
-          itemId={item.id} 
-          theme={currentTheme}
-        />
-      )}
-
       {/* Keyboard Shortcuts */}
       {showShortcuts && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -755,7 +780,7 @@ export default function ReadPage() {
         }
         
         .reader-content p {
-          margin-bottom: 1em;
+          margin-bottom: 1.5em;
           text-align: justify;
           hyphens: none;
           -webkit-hyphens: none;
@@ -766,10 +791,29 @@ export default function ReadPage() {
         
         .reader-content strong {
           font-weight: 600;
+          background: linear-gradient(180deg, transparent 60%, #fef3c7 60%);
+          background-size: 100% 200%;
+          padding: 0 2px;
         }
         
         .reader-content em {
           font-style: italic;
+        }
+        
+        .reader-content h2 {
+          font-size: 1.875rem;
+          font-weight: 700;
+          line-height: 1.3;
+          margin-top: 2.5rem;
+          margin-bottom: 1.25rem;
+        }
+        
+        .reader-content h3 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          line-height: 1.4;
+          margin-top: 2rem;
+          margin-bottom: 1rem;
         }
       `}</style>
       <style jsx global>{`
