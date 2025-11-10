@@ -111,15 +111,7 @@ export function QuizTab({ itemId }: QuizTabProps) {
   const correctCount = answers.filter((a) => a.isCorrect).length;
   const totalAnswered = answers.length;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Carregando quiz...</div>
-      </div>
-    );
-  }
-
-  if (questions.length === 0) {
+  if (questions.length === 0 && !loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="text-muted-foreground mb-2">Nenhum quiz disponível</p>

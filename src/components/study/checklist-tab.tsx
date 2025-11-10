@@ -87,15 +87,7 @@ export function ChecklistTab({ itemId }: ChecklistTabProps) {
   const totalCount = checklists.length;
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Carregando checklist...</div>
-      </div>
-    );
-  }
-
-  if (checklists.length === 0) {
+  if (checklists.length === 0 && !loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <p className="text-muted-foreground mb-2">Nenhum checklist disponível</p>

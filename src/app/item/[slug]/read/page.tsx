@@ -508,9 +508,12 @@ export default function ReadPage() {
             style={{ 
               maxWidth: widthMap[maxWidth],
               fontSize: `${fontSize}px`,
-              lineHeight,
+              lineHeight: `${lineHeight}`,
               fontFamily: 'Georgia, "Times New Roman", Times, serif',
               textAlign: 'justify',
+              hyphens: 'none',
+              WebkitHyphens: 'none',
+              MozHyphens: 'none',
             }}
           >
             {sections.length > 0 ? (
@@ -547,6 +550,7 @@ export default function ReadPage() {
           {/* Study Tools Section */}
           {item && (
             <div 
+              data-study-tools
               className="border-t mt-12"
               style={{ borderTopColor: `${currentTheme.secondary}33` }}
             >
@@ -621,12 +625,43 @@ export default function ReadPage() {
           )}
       </main>
 
+      {/* Floating Action Button for Quick Notes */}
+      {item && (
+        <button
+          onClick={() => {
+            const studySection = document.querySelector('[data-study-tools]');
+            if (studySection) {
+              studySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              setActiveStudyTab('notes');
+            }
+          }}
+          className="fixed bottom-6 right-6 z-40 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95"
+          style={{
+            backgroundColor: currentTheme.secondary,
+            color: currentTheme.bg,
+            width: '56px',
+            height: '56px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          aria-label="Ir para Notas"
+          title="Notas Rápidas"
+        >
+          <StickyNote className="w-6 h-6" />
+        </button>
+      )}
+
       {/* Custom Styles */}
       <style jsx global>{`
         .prose p {
           margin-bottom: 1em;
           text-indent: 1.25cm;
           text-align: justify;
+          hyphens: none !important;
+          -webkit-hyphens: none !important;
+          -moz-hyphens: none !important;
+          word-break: normal;
         }
         .prose p:first-of-type {
           text-indent: 0;

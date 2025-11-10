@@ -109,15 +109,7 @@ export function ProgressDashboard() {
     return reasons[reason] || reason.replace(/_/g, " ");
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Carregando progresso...</div>
-      </div>
-    );
-  }
-
-  if (!stats) {
+  if (!stats && !loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-muted-foreground">Erro ao carregar progresso</div>
@@ -125,8 +117,10 @@ export function ProgressDashboard() {
     );
   }
 
+  if (!stats) return null;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
       {/* New Badges Notification */}
       {unseenBadges.length > 0 && (
         <div className="fixed top-20 right-4 z-50 max-w-sm animate-in slide-in-from-right">
