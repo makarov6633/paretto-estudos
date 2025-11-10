@@ -14,7 +14,7 @@ type FullItem = Item & {
     orderIndex: number; 
     heading?: string | null; 
     contentHtml?: string | null;
-  };
+  }>;
 };
 
 async function fetchItem(slug: string): Promise<FullItem | null> {
@@ -41,8 +41,8 @@ async function fetchItem(slug: string): Promise<FullItem | null> {
 export default function ReadPage() {
   const { slug } = useParams<{ slug: string }>();
   const [item, setItem] = useState<FullItem | null>(null);
-  const [fontSize, setFontSize] = useState(18);
-  const [lineHeight, setLineHeight] = useState(1.6);
+  const [fontSize, setFontSize] = useState(16);
+  const [lineHeight, setLineHeight] = useState(1.5);
   const [maxWidth, setMaxWidth] = useState<'narrow' | 'medium' | 'wide' | 'full'>('medium');
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('sepia');
   const [showToc, setShowToc] = useState(false);
@@ -52,8 +52,8 @@ export default function ReadPage() {
   const { data: session } = useSession();
 
   const readerPrefsSchema = z.object({
-    fontSize: z.number().min(14).max(32).optional(),
-    lineHeight: z.number().min(1.2).max(2.4).optional(),
+    fontSize: z.number().min(12).max(32).optional(),
+    lineHeight: z.number().min(1.0).max(2.4).optional(),
     maxWidth: z.enum(['narrow', 'medium', 'wide', 'full']).optional(),
     theme: z.enum(['light', 'sepia', 'dark']).optional(),
   });
@@ -349,7 +349,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setFontSize(Math.max(14, fontSize - 2))}
+                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
                     className="h-9 px-3"
                   >
                     A-
@@ -373,7 +373,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setLineHeight(Math.max(1.2, lineHeight - 0.2))}
+                    onClick={() => setLineHeight(Math.max(1.0, lineHeight - 0.1))}
                     className="h-9 px-3"
                   >
                     -
@@ -382,7 +382,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setLineHeight(Math.min(2.4, lineHeight + 0.2))}
+                    onClick={() => setLineHeight(Math.min(2.4, lineHeight + 0.1))}
                     className="h-9 px-3"
                   >
                     +
@@ -505,6 +505,8 @@ export default function ReadPage() {
               maxWidth: widthMap[maxWidth],
               fontSize: `${fontSize}px`,
               lineHeight,
+              fontFamily: 'Georgia, "Times New Roman", Times, serif',
+              textAlign: 'justify',
             }}
           >
             {sections.length > 0 ? (
@@ -542,7 +544,12 @@ export default function ReadPage() {
       {/* Custom Styles */}
       <style jsx global>{`
         .prose p {
-          margin-bottom: 1.25em;
+          margin-bottom: 1em;
+          text-indent: 1.25cm;
+          text-align: justify;
+        }
+        .prose p:first-of-type {
+          text-indent: 0;
         }
         .prose blockquote {
           border-left: 4px solid ${currentTheme.secondary};

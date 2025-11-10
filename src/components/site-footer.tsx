@@ -7,10 +7,10 @@
             Paretto Estudos
           </p>
           <p className="text-xs text-muted-foreground">
-            Â(c) {new Date().getFullYear()} Todos os direitos reservados.
+            © {new Date().getFullYear()} Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground">
-            Aprenda 95% do conteÃºdo em 20% do tempo.
+            Aprenda 95% do conteúdo em 20% do tempo.
           </p>
         </div>
       </div>
