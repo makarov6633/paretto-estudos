@@ -122,7 +122,19 @@ export function QuizTab({ itemId }: QuizTabProps) {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-muted-foreground">Carregando quiz...</p>
+      </div>
+    );
+  }
+
   const question = questions[currentQuestion];
+  if (!question) {
+    return null;
+  }
+  
   const isLastQuestion = currentQuestion === questions.length - 1;
   const alreadyAnswered = hasAnswered(question.id);
 
@@ -153,21 +165,25 @@ export function QuizTab({ itemId }: QuizTabProps) {
                 onClick={() => !submitted && setSelectedOption(index)}
                 disabled={submitted || alreadyAnswered}
                 className={cn(
-                  "w-full text-left p-4 rounded-lg border transition-all",
-                  "hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  isSelected && !submitted && "border-primary bg-primary/5",
-                  showCorrect && "border-green-500 bg-green-500/10",
-                  showIncorrect && "border-red-500 bg-red-500/10",
+                  "w-full text-left rounded-xl border-2 transition-all duration-300",
+                  "hover:border-violet-400/50 focus:outline-none focus:ring-2 focus:ring-violet-500/20",
+                  "active:scale-[0.98]",
+                  "p-4 min-h-[56px]", // Mobile touch optimization
+                  isSelected && !submitted && "border-violet-500 bg-violet-50/50 dark:bg-violet-950/30",
+                  showCorrect && "border-green-500 bg-green-50 dark:bg-green-950/30",
+                  showIncorrect && "border-red-500 bg-red-50 dark:bg-red-950/30",
+                  !isSelected && !submitted && !alreadyAnswered && "border-gray-200 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-900/50",
                   (submitted || alreadyAnswered) && "cursor-not-allowed"
                 )}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={cn(
-                      "flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center mt-0.5",
-                      isSelected && !submitted && "border-primary bg-primary/10",
-                      showCorrect && "border-green-500 bg-green-500",
-                      showIncorrect && "border-red-500 bg-red-500"
+                      "flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300",
+                      isSelected && !submitted && "border-violet-500 bg-violet-100 dark:bg-violet-900",
+                      showCorrect && "border-green-500 bg-gradient-to-br from-green-500 to-emerald-600 shadow-md",
+                      showIncorrect && "border-red-500 bg-gradient-to-br from-red-500 to-rose-600 shadow-md",
+                      !isSelected && !submitted && !alreadyAnswered && "border-gray-300 dark:border-gray-700"
                     )}
                   >
                     {showCorrect && <Check className="w-4 h-4 text-white" />}
@@ -225,13 +241,13 @@ export function QuizTab({ itemId }: QuizTabProps) {
           <Button
             onClick={submitAnswer}
             disabled={selectedOption === null}
-            className="flex-1"
+            className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold shadow-md min-h-[48px]"
           >
             Enviar Resposta
           </Button>
         )}
         {(submitted || alreadyAnswered) && !isLastQuestion && (
-          <Button onClick={nextQuestion} className="flex-1">
+          <Button onClick={nextQuestion} className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold shadow-md min-h-[48px]">
             Próxima Questão
           </Button>
         )}
@@ -242,7 +258,7 @@ export function QuizTab({ itemId }: QuizTabProps) {
               Você acertou {correctCount} de {questions.length} questões (
               {Math.round((correctCount / questions.length) * 100)}%)
             </p>
-            <Button onClick={resetQuiz} variant="outline" className="mt-3">
+            <Button onClick={resetQuiz} variant="outline" className="mt-3 border-2 min-h-[44px]">
               Refazer Quiz
             </Button>
           </div>

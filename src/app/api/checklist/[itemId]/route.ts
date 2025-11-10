@@ -27,7 +27,13 @@ export async function GET(
     }
 
     const progress = await db
-      .select()
+      .select({
+        userId: userChecklistProgress.userId,
+        checklistId: userChecklistProgress.checklistId,
+        completed: userChecklistProgress.completed,
+        completedAt: userChecklistProgress.completedAt,
+        updatedAt: userChecklistProgress.updatedAt,
+      })
       .from(userChecklistProgress)
       .where(eq(userChecklistProgress.userId, session.user.id));
 
@@ -59,7 +65,13 @@ export async function POST(
     const { checklistId, completed } = body;
 
     const existing = await db
-      .select()
+      .select({
+        userId: userChecklistProgress.userId,
+        checklistId: userChecklistProgress.checklistId,
+        completed: userChecklistProgress.completed,
+        completedAt: userChecklistProgress.completedAt,
+        updatedAt: userChecklistProgress.updatedAt,
+      })
       .from(userChecklistProgress)
       .where(
         and(
@@ -98,7 +110,6 @@ export async function POST(
       const created = await db
         .insert(userChecklistProgress)
         .values({
-          id: crypto.randomUUID(),
           userId: session.user.id,
           checklistId,
           completed,
