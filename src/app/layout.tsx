@@ -12,12 +12,16 @@ const inter = Inter({
   variable: "--font-heading",
   subsets: ["latin"],
   display: "swap",
+  preload: true,
+  adjustFontFallback: true,
 });
 const workSans = Work_Sans({
   variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
   weight: ["300", "400", "500", "600", "700", "800", "900"],
+  preload: true,
+  adjustFontFallback: true,
 });
 // Reader font optimized for long-form reading (similar to Kindle's Bookerly)
 const literata = Literata({
@@ -25,6 +29,8 @@ const literata = Literata({
   subsets: ["latin"],
   display: "swap",
   weight: ["300", "400", "500", "600", "700"],
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {

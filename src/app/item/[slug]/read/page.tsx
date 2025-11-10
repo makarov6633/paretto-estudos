@@ -670,6 +670,11 @@ export default function ReadPage() {
               MozHyphens: 'none',
               wordBreak: 'keep-all',
               overflowWrap: 'break-word',
+              WebkitFontSmoothing: 'subpixel-antialiased',
+              MozOsxFontSmoothing: 'auto',
+              textRendering: 'optimizeLegibility',
+              fontFeatureSettings: '"kern" 1, "liga" 1, "calt" 1',
+              fontOpticalSizing: 'auto',
             }}
           >
             {sections.length > 0 ? (
@@ -691,9 +696,10 @@ export default function ReadPage() {
                     className="prose prose-lg max-w-none reader-content"
                     style={{ 
                       color: currentTheme.text,
-                      WebkitFontSmoothing: 'antialiased',
-                      MozOsxFontSmoothing: 'grayscale',
+                      WebkitFontSmoothing: 'subpixel-antialiased',
+                      MozOsxFontSmoothing: 'auto',
                       textRendering: 'optimizeLegibility',
+                      fontFeatureSettings: '"kern" 1, "liga" 1, "calt" 1',
                     }}
                     dangerouslySetInnerHTML={{ 
                       __html: DOMPurify.sanitize(section.contentHtml || '', {
@@ -773,10 +779,13 @@ export default function ReadPage() {
       {/* Custom Styles */}
       <style jsx global>{`
         .reader-content {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
+          -webkit-font-smoothing: subpixel-antialiased;
+          -moz-osx-font-smoothing: auto;
           text-rendering: optimizeLegibility;
-          font-feature-settings: "kern" 1, "liga" 1;
+          font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+          font-optical-sizing: auto;
+          font-synthesis: none;
+          image-rendering: crisp-edges;
         }
         
         .reader-content p {
@@ -814,6 +823,22 @@ export default function ReadPage() {
           line-height: 1.4;
           margin-top: 2rem;
           margin-bottom: 1rem;
+        }
+        
+        /* Optimizations for high-DPI displays (Retina, 2K, 4K) */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+          .reader-content {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+        }
+        
+        /* Ensure crisp rendering on all browsers */
+        .reader-content * {
+          font-variant-ligatures: common-ligatures;
+          font-kerning: normal;
+          text-size-adjust: 100%;
+          -webkit-text-size-adjust: 100%;
         }
       `}</style>
       <style jsx global>{`

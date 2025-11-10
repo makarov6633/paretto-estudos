@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Font rendering optimization for crisp, clear text */
+* {
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
 @theme inline {
   /* Custom breakpoint for extra small devices (phones in portrait) */
   --breakpoint-xs: 480px;
@@ -456,20 +464,26 @@ body.immersive main {
 
 /* Advanced Text Rendering - Prevent Word Breaking */
 .prose {
-  /* Disable all forms of hyphenation */
   hyphens: none !important;
   -webkit-hyphens: none !important;
   -moz-hyphens: none !important;
   -ms-hyphens: none !important;
   
-  /* Keep words together */
   word-break: keep-all;
   overflow-wrap: normal;
   
-  /* Better text rendering */
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* High-DPI displays optimization (Retina, 2K, 4K) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .prose {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 .prose p,
