@@ -4,6 +4,8 @@ import { userNote } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { addPoints, updateStreak, incrementStat } from "@/lib/gamification";
+import { nanoid } from "nanoid";
 
 export async function GET(
   request: NextRequest,
@@ -60,6 +62,7 @@ export async function POST(
     const note = await db
       .insert(userNote)
       .values({
+        id: nanoid(),
         userId: session.user.id,
         itemId,
         sectionId: sectionId || null,
@@ -70,6 +73,10 @@ export async function POST(
         updatedAt: new Date(),
       })
       .returning();
+
+    await addPoints(session.user.id, 15, "note_created", note[0].id);
+    await updateStreak(session.user.id);
+    await incrementStat(session.user.id, "notesCreated");
 
     return NextResponse.json(note[0]);
   } catch (error) {

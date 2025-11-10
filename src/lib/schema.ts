@@ -6,6 +6,7 @@ import {
   integer,
   jsonb,
   uniqueIndex,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -224,5 +225,62 @@ export const studySession = pgTable("study_session", {
   type: text("type").notNull(), // 'reading' | 'quiz' | 'notes' | 'checklist'
   duration: integer("duration"), // in seconds
   completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+// Gamification tables
+export const userGamification = pgTable("user_gamification", {
+  userId: text("userId")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  totalPoints: integer("totalPoints").notNull().default(0),
+  currentStreak: integer("currentStreak").notNull().default(0),
+  longestStreak: integer("longestStreak").notNull().default(0),
+  lastStudyDate: timestamp("lastStudyDate"),
+  level: integer("level").notNull().default(1),
+  quizzesCompleted: integer("quizzesCompleted").notNull().default(0),
+  checklistsCompleted: integer("checklistsCompleted").notNull().default(0),
+  notesCreated: integer("notesCreated").notNull().default(0),
+  itemsRead: integer("itemsRead").notNull().default(0),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export const badgeDefinition = pgTable("badge_definition", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(), // emoji or icon name
+  category: text("category").notNull(), // 'milestone', 'streak', 'achievement', 'special'
+  requirement: jsonb("requirement").notNull(), // { type: 'points', value: 1000 } or { type: 'streak', value: 7 }
+  points: integer("points").notNull().default(0), // bonus points for earning badge
+  rarity: text("rarity").notNull().default("common"), // 'common', 'rare', 'epic', 'legendary'
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export const userBadge = pgTable(
+  "user_badge",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    badgeId: text("badgeId")
+      .notNull()
+      .references(() => badgeDefinition.id, { onDelete: "cascade" }),
+    earnedAt: timestamp("earnedAt").notNull().defaultNow(),
+    seen: boolean("seen").notNull().default(false), // for notifications
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.badgeId] }),
+  })
+);
+
+export const pointTransaction = pgTable("point_transaction", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  points: integer("points").notNull(),
+  reason: text("reason").notNull(), // 'quiz_completed', 'checklist_item', 'note_created', etc
+  referenceId: text("referenceId"), // ID of the quiz/checklist/note
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });

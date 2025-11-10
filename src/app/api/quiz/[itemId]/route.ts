@@ -4,6 +4,8 @@ import { quizQuestion, quizAnswer } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { addPoints, updateStreak, incrementStat } from "@/lib/gamification";
+import { nanoid } from "nanoid";
 
 export async function GET(
   request: NextRequest,
@@ -71,6 +73,7 @@ export async function POST(
     const answer = await db
       .insert(quizAnswer)
       .values({
+        id: nanoid(),
         userId: session.user.id,
         questionId,
         selectedAnswer,
@@ -78,6 +81,33 @@ export async function POST(
         attemptedAt: new Date(),
       })
       .returning();
+
+    if (isCorrect) {
+      await addPoints(session.user.id, 20, "quiz_correct", questionId);
+    } else {
+      await addPoints(session.user.id, 5, "quiz_attempted", questionId);
+    }
+    
+    await updateStreak(session.user.id);
+
+    const allQuestions = await db
+      .select()
+      .from(quizQuestion)
+      .where(eq(quizQuestion.itemId, question[0].itemId || ""));
+
+    const allAnswers = await db
+      .select()
+      .from(quizAnswer)
+      .where(eq(quizAnswer.userId, session.user.id));
+
+    const quizQuestionIds = new Set(allQuestions.map((q) => q.id));
+    const answeredForThisQuiz = allAnswers.filter((a) =>
+      quizQuestionIds.has(a.questionId)
+    );
+
+    if (answeredForThisQuiz.length === allQuestions.length) {
+      await incrementStat(session.user.id, "quizzesCompleted");
+    }
 
     return NextResponse.json({
       ...answer[0],

@@ -4,6 +4,7 @@ import { checklist, userChecklistProgress } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { addPoints, updateStreak, incrementStat } from "@/lib/gamification";
 
 export async function GET(
   request: NextRequest,
@@ -68,6 +69,8 @@ export async function POST(
       .limit(1);
 
     if (existing.length > 0) {
+      const wasCompleted = existing[0].completed;
+      
       const updated = await db
         .update(userChecklistProgress)
         .set({
@@ -83,6 +86,12 @@ export async function POST(
         )
         .returning();
 
+      if (completed && !wasCompleted) {
+        await addPoints(session.user.id, 10, "checklist_completed", checklistId);
+        await updateStreak(session.user.id);
+        await incrementStat(session.user.id, "checklistsCompleted");
+      }
+
       return NextResponse.json(updated[0]);
     } else {
       const created = await db
@@ -95,6 +104,12 @@ export async function POST(
           updatedAt: new Date(),
         })
         .returning();
+
+      if (completed) {
+        await addPoints(session.user.id, 10, "checklist_completed", checklistId);
+        await updateStreak(session.user.id);
+        await incrementStat(session.user.id, "checklistsCompleted");
+      }
 
       return NextResponse.json(created[0]);
     }

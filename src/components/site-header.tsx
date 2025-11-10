@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { UserProfile } from "@/components/auth/user-profile";
 import { ModeToggle } from "./ui/mode-toggle";
-import { Sparkles, Menu } from "lucide-react";
+import { Sparkles, Menu, Trophy, User } from "lucide-react";
 import { BackButton } from "@/components/BackButton";
 import { usePathname } from "next/navigation";
 import {
@@ -49,6 +49,26 @@ export function SiteHeader() {
             Biblioteca
           </Link>
           <Link
+            href="/leaderboard"
+            prefetch
+            aria-current={pathname?.startsWith("/leaderboard") ? "page" : undefined}
+            className="no-underline text-foreground/80 transition-colors hover:text-foreground data-[active=true]:text-foreground flex items-center gap-1"
+            data-active={pathname?.startsWith("/leaderboard") ? "true" : undefined}
+          >
+            <Trophy className="w-4 h-4" />
+            Ranking
+          </Link>
+          <Link
+            href="/profile"
+            prefetch
+            aria-current={pathname?.startsWith("/profile") ? "page" : undefined}
+            className="no-underline text-foreground/80 transition-colors hover:text-foreground data-[active=true]:text-foreground flex items-center gap-1"
+            data-active={pathname?.startsWith("/profile") ? "true" : undefined}
+          >
+            <User className="w-4 h-4" />
+            Progresso
+          </Link>
+          <Link
             href="/requests"
             prefetch
             aria-current={pathname?.startsWith("/requests") ? "page" : undefined}
@@ -77,13 +97,20 @@ export function SiteHeader() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/requests" prefetch className="w-full no-underline">
-                  Solicitacoes
+                <Link href="/leaderboard" prefetch className="w-full no-underline flex items-center gap-2">
+                  <Trophy className="w-4 h-4" />
+                  Ranking
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/profile" prefetch className="w-full no-underline">
-                  Perfil
+                <Link href="/profile" prefetch className="w-full no-underline flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Progresso
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/requests" prefetch className="w-full no-underline">
+                  Solicitacoes
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
