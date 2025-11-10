@@ -157,18 +157,23 @@ export const checklist = pgTable("checklist", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
-export const userChecklistProgress = pgTable("user_checklist_progress", {
-  id: text("id").primaryKey(),
-  userId: text("userId")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  checklistId: text("checklistId")
-    .notNull()
-    .references(() => checklist.id, { onDelete: "cascade" }),
-  completed: boolean("completed").notNull().default(false),
-  completedAt: timestamp("completedAt"),
-  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
+export const userChecklistProgress = pgTable(
+  "user_checklist_progress",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    checklistId: text("checklistId")
+      .notNull()
+      .references(() => checklist.id, { onDelete: "cascade" }),
+    completed: boolean("completed").notNull().default(false),
+    completedAt: timestamp("completedAt"),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.checklistId] }),
+  })
+);
 
 export const quizQuestion = pgTable("quiz_question", {
   id: text("id").primaryKey(),

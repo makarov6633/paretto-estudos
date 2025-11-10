@@ -132,23 +132,33 @@ export function NotesTab({ itemId }: NotesTabProps) {
   return (
     <div className="space-y-4">
       {!isCreating ? (
-        <Button onClick={() => setIsCreating(true)} className="w-full">
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Nota
-        </Button>
+        <button 
+          onClick={() => setIsCreating(true)} 
+          className="w-full rounded-xl border-2 border-dashed border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/20 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-950/40 dark:hover:to-orange-950/40 transition-all duration-300 group active:scale-[0.98] p-4 min-h-[56px]"
+        >
+          <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300">
+            <Plus className="w-5 h-5 transition-transform group-hover:scale-110" strokeWidth={2.5} />
+            <span className="font-semibold">Nova Nota</span>
+          </div>
+        </button>
       ) : (
-        <div className="space-y-2 p-4 border rounded-lg bg-muted/30">
+        <div className="space-y-3 p-5 border-2 border-amber-300 dark:border-amber-700 rounded-2xl bg-gradient-to-br from-amber-50/80 to-orange-50/80 dark:from-amber-950/30 dark:to-orange-950/30 shadow-lg shadow-amber-500/10">
           <Textarea
             value={newNoteContent}
             onChange={(e) => setNewNoteContent(e.target.value)}
-            placeholder="Escreva sua nota aqui..."
-            className="min-h-[120px] resize-none"
+            placeholder="✍️ Escreva sua nota aqui..."
+            className="min-h-[140px] resize-none border-2 border-amber-200 dark:border-amber-800 rounded-xl focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 bg-white/80 dark:bg-gray-950/50 font-medium"
             autoFocus
           />
           <div className="flex gap-2">
-            <Button onClick={createNote} size="sm" disabled={!newNoteContent.trim()}>
+            <Button 
+              onClick={createNote} 
+              size="sm" 
+              disabled={!newNoteContent.trim()}
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md min-h-[44px] px-4"
+            >
               <Save className="w-4 h-4 mr-2" />
-              Salvar
+              Salvar Nota
             </Button>
             <Button
               onClick={() => {
@@ -157,6 +167,7 @@ export function NotesTab({ itemId }: NotesTabProps) {
               }}
               size="sm"
               variant="outline"
+              className="border-2 min-h-[44px] px-4"
             >
               <X className="w-4 h-4 mr-2" />
               Cancelar
@@ -178,7 +189,7 @@ export function NotesTab({ itemId }: NotesTabProps) {
         {notes.map((note) => (
           <div
             key={note.id}
-            className="p-4 border rounded-lg bg-card hover:border-primary/30 transition-colors"
+            className="group p-5 border-2 border-gray-200 dark:border-gray-800 rounded-2xl bg-white/50 dark:bg-gray-900/50 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300"
           >
             {editingId === note.id ? (
               <div className="space-y-2">
@@ -193,11 +204,12 @@ export function NotesTab({ itemId }: NotesTabProps) {
                     onClick={() => updateNote(note.id)}
                     size="sm"
                     disabled={!editContent.trim()}
+                    className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md min-h-[44px]"
                   >
                     <Save className="w-4 h-4 mr-2" />
                     Salvar
                   </Button>
-                  <Button onClick={cancelEdit} size="sm" variant="outline">
+                  <Button onClick={cancelEdit} size="sm" variant="outline" className="border-2 min-h-[44px]">
                     <X className="w-4 h-4 mr-2" />
                     Cancelar
                   </Button>
@@ -205,19 +217,21 @@ export function NotesTab({ itemId }: NotesTabProps) {
               </div>
             ) : (
               <>
-                <p className="text-sm whitespace-pre-wrap mb-3">{note.content}</p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{formatDate(note.updatedAt)}</span>
-                  <div className="flex gap-2">
+                <p className="text-sm whitespace-pre-wrap mb-4 leading-relaxed font-['Literata',Georgia,serif]">{note.content}</p>
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-gray-200 dark:border-gray-800">
+                  <span className="font-medium">{formatDate(note.updatedAt)}</span>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => startEdit(note)}
-                      className="p-1 hover:text-primary transition-colors"
+                      className="rounded-lg transition-all active:scale-95 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      title="Editar nota"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deleteNote(note.id)}
-                      className="p-1 hover:text-destructive transition-colors"
+                      className="rounded-lg transition-all active:scale-95 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                      title="Excluir nota"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

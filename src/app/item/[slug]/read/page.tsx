@@ -4,13 +4,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import type { Item } from "@/types";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Type, BookOpen, CheckSquare, Brain, StickyNote } from "lucide-react";
+import { ChevronLeft, Type, BookOpen } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
-import { ChecklistTab } from "@/components/study/checklist-tab";
-import { QuizTab } from "@/components/study/quiz-tab";
-import { NotesTab } from "@/components/study/notes-tab";
+import { FloatingStudyTools } from "@/components/study/floating-study-tools";
 
 type FullItem = Item & {
   sections?: Array<{ 
@@ -19,6 +17,35 @@ type FullItem = Item & {
     contentHtml?: string | null;
   }>;
 };
+
+function removeIncorrectHyphens(html: string): string {
+  if (!html) return html;
+  
+  let processed = html;
+  
+  // Remove soft hyphens (caracteres invisíveis de quebra)
+  processed = processed.replace(/\u00AD/g, ''); // Soft hyphen (&#173;)
+  processed = processed.replace(/&shy;/gi, ''); // HTML entity
+  
+  // Remove hifenização incorreta no final de tags/linhas
+  // Padrão: "palavra-</p><p>palavra" ou "palavra- palavra"
+  processed = processed
+    // Remove hífen antes de tag de fechamento seguido de abertura
+    .replace(/(\w+)-\s*<\/([^>]+)>\s*<([^>]+)>\s*(\w+)/g, '$1$4')
+    // Remove hífen seguido de espaço(s) e outra palavra
+    .replace(/(\w+)-\s+(\w+)/g, '$1$2')
+    // Remove hífen seguido de quebra de linha e palavra
+    .replace(/(\w+)-\s*\n\s*(\w+)/g, '$1$2')
+    // Remove hífen antes de <br> e depois palavra
+    .replace(/(\w+)-\s*<br\s*\/?>\s*(\w+)/gi, '$1$2')
+    // Remove hífen antes de <p> e depois palavra  
+    .replace(/(\w+)-\s*<\/p>\s*<p[^>]*>\s*(\w+)/gi, '$1$4');
+  
+  // Normaliza espaçamentos múltiplos
+  processed = processed.replace(/\s{2,}/g, ' ');
+  
+  return processed;
+}
 
 async function fetchItem(slug: string): Promise<FullItem | null> {
   try {
@@ -34,7 +61,17 @@ async function fetchItem(slug: string): Promise<FullItem | null> {
     }
     
     const data = await response.json();
-    return (data.items?.[0] as FullItem) ?? null;
+    const item = (data.items?.[0] as FullItem) ?? null;
+    
+    // Processa o HTML para remover hifenizações incorretas
+    if (item?.sections) {
+      item.sections = item.sections.map(section => ({
+        ...section,
+        contentHtml: section.contentHtml ? removeIncorrectHyphens(section.contentHtml) : null,
+      }));
+    }
+    
+    return item;
   } catch (error) {
     console.error('Error fetching item:', error);
     return null;
@@ -59,7 +96,7 @@ export default function ReadPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [activeStudyTab, setActiveStudyTab] = useState<'checklist' | 'quiz' | 'notes'>('checklist');
+
   useSession();
 
   useEffect(() => {
@@ -514,6 +551,8 @@ export default function ReadPage() {
               hyphens: 'none',
               WebkitHyphens: 'none',
               MozHyphens: 'none',
+              wordBreak: 'keep-all',
+              overflowWrap: 'break-word',
             }}
           >
             {sections.length > 0 ? (
@@ -547,124 +586,41 @@ export default function ReadPage() {
             )}
           </article>
 
-          {/* Study Tools Section */}
-          {item && (
-            <div 
-              data-study-tools
-              className="border-t mt-12"
-              style={{ borderTopColor: `${currentTheme.secondary}33` }}
-            >
-              <div 
-                className="mx-auto px-4 sm:px-6 py-8"
-                style={{ maxWidth: widthMap[maxWidth] }}
-              >
-                <h2 
-                  className="text-xl sm:text-2xl font-bold mb-6"
-                  style={{ color: currentTheme.text }}
-                >
-                  Ferramentas de Estudo
-                </h2>
 
-                {/* Tabs */}
-                <div className="flex gap-2 mb-6 flex-wrap">
-                  <Button
-                    onClick={() => setActiveStudyTab('checklist')}
-                    variant={activeStudyTab === 'checklist' ? 'default' : 'outline'}
-                    className="flex-1 sm:flex-none"
-                    style={{
-                      backgroundColor: activeStudyTab === 'checklist' ? currentTheme.secondary : 'transparent',
-                      color: activeStudyTab === 'checklist' ? currentTheme.bg : currentTheme.text,
-                      borderColor: `${currentTheme.secondary}44`,
-                    }}
-                  >
-                    <CheckSquare className="w-4 h-4 mr-2" />
-                    Checklist
-                  </Button>
-                  <Button
-                    onClick={() => setActiveStudyTab('quiz')}
-                    variant={activeStudyTab === 'quiz' ? 'default' : 'outline'}
-                    className="flex-1 sm:flex-none"
-                    style={{
-                      backgroundColor: activeStudyTab === 'quiz' ? currentTheme.secondary : 'transparent',
-                      color: activeStudyTab === 'quiz' ? currentTheme.bg : currentTheme.text,
-                      borderColor: `${currentTheme.secondary}44`,
-                    }}
-                  >
-                    <Brain className="w-4 h-4 mr-2" />
-                    Quiz
-                  </Button>
-                  <Button
-                    onClick={() => setActiveStudyTab('notes')}
-                    variant={activeStudyTab === 'notes' ? 'default' : 'outline'}
-                    className="flex-1 sm:flex-none"
-                    style={{
-                      backgroundColor: activeStudyTab === 'notes' ? currentTheme.secondary : 'transparent',
-                      color: activeStudyTab === 'notes' ? currentTheme.bg : currentTheme.text,
-                      borderColor: `${currentTheme.secondary}44`,
-                    }}
-                  >
-                    <StickyNote className="w-4 h-4 mr-2" />
-                    Notas
-                  </Button>
-                </div>
-
-                {/* Tab Content */}
-                <div 
-                  className="rounded-lg border p-4 sm:p-6"
-                  style={{
-                    backgroundColor: `${currentTheme.bg}88`,
-                    borderColor: `${currentTheme.secondary}33`,
-                  }}
-                >
-                  {activeStudyTab === 'checklist' && <ChecklistTab itemId={item.id} />}
-                  {activeStudyTab === 'quiz' && <QuizTab itemId={item.id} />}
-                  {activeStudyTab === 'notes' && <NotesTab itemId={item.id} />}
-                </div>
-              </div>
-            </div>
-          )}
       </main>
 
-      {/* Floating Action Button for Quick Notes */}
+      {/* Floating Study Tools */}
       {item && (
-        <button
-          onClick={() => {
-            const studySection = document.querySelector('[data-study-tools]');
-            if (studySection) {
-              studySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              setActiveStudyTab('notes');
-            }
-          }}
-          className="fixed bottom-6 right-6 z-40 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95"
-          style={{
-            backgroundColor: currentTheme.secondary,
-            color: currentTheme.bg,
-            width: '56px',
-            height: '56px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          aria-label="Ir para Notas"
-          title="Notas Rápidas"
-        >
-          <StickyNote className="w-6 h-6" />
-        </button>
+        <FloatingStudyTools 
+          itemId={item.id} 
+          theme={currentTheme}
+        />
       )}
 
       {/* Custom Styles */}
       <style jsx global>{`
         .prose p {
           margin-bottom: 1em;
-          text-indent: 1.25cm;
+          text-indent: 0; /* ABNT: sem recuo na primeira linha */
           text-align: justify;
           hyphens: none !important;
           -webkit-hyphens: none !important;
           -moz-hyphens: none !important;
-          word-break: normal;
+          word-break: keep-all !important;
+          overflow-wrap: break-word;
+          word-spacing: normal;
+          letter-spacing: 0.01em; /* Micro ajuste para melhor espaçamento */
+        }
+        .prose p::before {
+          content: '';
+          display: inline;
         }
         .prose p:first-of-type {
           text-indent: 0;
+        }
+        /* ABNT: Espaçamento entre parágrafos */
+        .prose p + p {
+          margin-top: 1.5em;
         }
         .prose blockquote {
           border-left: 4px solid ${currentTheme.secondary};
