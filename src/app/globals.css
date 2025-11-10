@@ -115,13 +115,13 @@
 }
 
 .dark {
-  /* Deep, comfortable dark neutrals */
-  --background: oklch(0.16 0.004 286);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.22 0.006 286);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.22 0.006 286);
-  --popover-foreground: oklch(0.985 0 0);
+  /* Deep, comfortable dark neutrals with enhanced contrast */
+  --background: oklch(0.12 0.004 286);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.18 0.006 286);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.18 0.006 286);
+  --popover-foreground: oklch(1 0 0);
 
   /* Slightly deeper primary for dark */
   --primary: oklch(0.68 0.14 150);
@@ -466,10 +466,11 @@ body.immersive main {
   word-break: keep-all;
   overflow-wrap: normal;
   
-  /* Better text rendering */
+  /* Better text rendering - Ultra crisp */
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
 }
 
 .prose p,
@@ -486,7 +487,10 @@ body.immersive main {
   text-align: justify;
   text-justify: inter-word;
   word-spacing: normal;
-  letter-spacing: normal;
+  letter-spacing: 0.015em;
+  
+  /* Enhanced readability */
+  font-weight: 500;
 }
 
 /* Remove any lang-specific hyphenation */

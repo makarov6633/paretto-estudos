@@ -322,14 +322,14 @@ export default function ReadPage() {
       secondary: '#8b7355',
     },
     dark: {
-      bg: '#1a1a1a',
-      text: '#e8e6e3',
-      secondary: '#a8a29e',
+      bg: '#0a0a0a',
+      text: '#ffffff',
+      secondary: '#b4b4b4',
     },
     'high-contrast': {
       bg: '#000000',
       text: '#ffffff',
-      secondary: '#ffff00',
+      secondary: '#ffd700',
     },
   };
 
@@ -649,7 +649,11 @@ export default function ReadPage() {
                   {section.heading && (
                     <h2 
                       className="text-2xl sm:text-3xl font-bold mb-4"
-                      style={{ color: currentTheme.text }}
+                      style={{ 
+                        color: currentTheme.text,
+                        fontWeight: 700,
+                        textShadow: theme === 'dark' ? '0 2px 4px rgba(0, 0, 0, 0.4)' : 'none',
+                      }}
                     >
                       {section.heading}
                     </h2>
@@ -658,6 +662,7 @@ export default function ReadPage() {
                     className="prose prose-lg max-w-none reader-content"
                     style={{ 
                       color: currentTheme.text,
+                      fontWeight: theme === 'high-contrast' ? 600 : 500,
                       WebkitFontSmoothing: 'antialiased',
                       MozOsxFontSmoothing: 'grayscale',
                       textRendering: 'optimizeLegibility',
@@ -761,11 +766,13 @@ export default function ReadPage() {
           -webkit-hyphens: none;
           -moz-hyphens: none;
           word-spacing: 0.05em;
-          letter-spacing: 0.01em;
+          letter-spacing: 0.015em;
+          font-weight: ${theme === 'high-contrast' ? '600' : '500'};
+          text-shadow: ${theme === 'dark' ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none'};
         }
         
         .reader-content strong {
-          font-weight: 600;
+          font-weight: 700;
         }
         
         .reader-content em {
@@ -783,7 +790,10 @@ export default function ReadPage() {
           word-break: keep-all !important;
           overflow-wrap: break-word;
           word-spacing: normal;
-          letter-spacing: 0.01em; /* Micro ajuste para melhor espaçamento */
+          letter-spacing: 0.015em;
+          font-weight: ${theme === 'high-contrast' ? '600' : '500'};
+          color: ${currentTheme.text};
+          text-shadow: ${theme === 'dark' ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none'};
         }
         .prose p::before {
           content: '';
@@ -819,8 +829,9 @@ export default function ReadPage() {
           margin: 0.5em 0;
         }
         .prose strong {
-          font-weight: 600;
+          font-weight: 700;
           color: ${currentTheme.text};
+          text-shadow: ${theme === 'dark' ? '0 1px 3px rgba(0, 0, 0, 0.4)' : 'none'};
         }
         .prose em {
           font-style: italic;
@@ -828,8 +839,9 @@ export default function ReadPage() {
         .prose h3, .prose h4, .prose h5, .prose h6 {
           margin-top: 2em;
           margin-bottom: 1em;
-          font-weight: 600;
+          font-weight: 700;
           color: ${currentTheme.text};
+          text-shadow: ${theme === 'dark' ? '0 2px 4px rgba(0, 0, 0, 0.4)' : 'none'};
         }
         
         /* Scrollbar customization */

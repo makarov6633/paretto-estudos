@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckSquare, Brain, StickyNote, X, Sparkles, ChevronRight } from "lucide-react";
+import { CheckSquare, Brain, NotebookPen, X, Sparkles, ChevronRight } from "lucide-react";
 import { ChecklistTab } from "./checklist-tab";
 import { QuizTab } from "./quiz-tab";
 import { NotesTab } from "./notes-tab";
@@ -72,12 +72,12 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
     },
     {
       id: 'notes' as const,
-      icon: StickyNote,
+      icon: NotebookPen,
       label: 'Notas',
       description: 'Anote suas reflexões',
-      gradient: 'from-amber-500 to-orange-600',
-      color: '#f59e0b',
-      lightColor: '#fef3c7',
+      gradient: 'from-sky-500 to-blue-600',
+      color: '#0ea5e9',
+      lightColor: '#e0f2fe',
     },
   ];
 
@@ -154,21 +154,22 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
                 </div>
               )}
               
-              {/* Icon Button with Gradient - Touch optimized for mobile */}
+              {/* Icon Button with modern design - Touch optimized for mobile */}
               <div
-                className={`relative flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 bg-gradient-to-br ${tool.gradient} ${
-                  isMobile ? 'w-12 h-12 rounded-xl' : 'w-14 h-14 rounded-2xl'
+                className={`relative flex items-center justify-center transition-all duration-300 hover:scale-110 hover:rotate-3 active:scale-95 bg-gradient-to-br ${tool.gradient} ${
+                  isMobile ? 'w-12 h-12 rounded-2xl' : 'w-14 h-14 rounded-2xl'
                 }`}
                 style={{
-                  boxShadow: `0 8px 32px -4px ${tool.color}60, 0 0 0 1px ${tool.color}20`,
+                  boxShadow: `0 12px 40px -8px ${tool.color}70, 0 4px 16px -2px ${tool.color}40, 0 0 0 1px ${tool.color}30`,
                   minWidth: '48px',
                   minHeight: '48px',
                 }}
               >
-                {/* Shine effect */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {/* Animated shine effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/30 via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-bl from-transparent via-transparent to-black/10" />
                 
-                <tool.icon className={`text-white relative z-10 ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />
+                <tool.icon className={`text-white relative z-10 drop-shadow-sm ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.2} />
                 
                 {/* Mobile label below icon */}
                 {isMobile && (
@@ -188,21 +189,21 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
           ))}
         </div>
 
-        {/* Main FAB - Touch optimized */}
+        {/* Main FAB - Premium design */}
         <button
           onClick={toggleMenu}
           className={`relative overflow-hidden group transition-all duration-500 ease-out active:scale-90 ${
             isMobile 
-              ? 'w-14 h-14 rounded-xl shadow-xl hover:shadow-2xl' 
+              ? 'w-14 h-14 rounded-2xl shadow-xl hover:shadow-2xl' 
               : 'w-16 h-16 rounded-2xl shadow-2xl hover:scale-105 active:scale-95'
           }`}
           style={{
             background: isOpen || activeTool 
-              ? `linear-gradient(135deg, ${theme.secondary} 0%, ${theme.secondary}dd 100%)`
-              : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              ? `linear-gradient(135deg, ${theme.secondary}ee 0%, ${theme.secondary}cc 100%)`
+              : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
             boxShadow: isMobile 
-              ? '0 8px 32px -4px rgba(59, 130, 246, 0.5), 0 0 0 1px rgba(59, 130, 246, 0.1)'
-              : '0 12px 48px -8px rgba(59, 130, 246, 0.5), 0 0 0 1px rgba(59, 130, 246, 0.1)',
+              ? '0 12px 40px -8px rgba(59, 130, 246, 0.6), 0 4px 16px -2px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)'
+              : '0 16px 56px -12px rgba(59, 130, 246, 0.6), 0 8px 24px -4px rgba(59, 130, 246, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.2)',
             transform: isOpen ? 'rotate(45deg)' : activeTool ? 'rotate(180deg)' : 'rotate(0deg)',
             minWidth: '48px',
             minHeight: '48px',
@@ -277,7 +278,7 @@ export function FloatingStudyTools({ itemId, theme }: FloatingStudyToolsProps) {
                     >
                       {activeTool === 'checklist' && <CheckSquare className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
                       {activeTool === 'quiz' && <Brain className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
-                      {activeTool === 'notes' && <StickyNote className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
+                      {activeTool === 'notes' && <NotebookPen className={`text-white ${isMobile ? 'w-5 h-5' : 'w-6 h-6'}`} strokeWidth={2.5} />}
                     </div>
                     
                     <div>
