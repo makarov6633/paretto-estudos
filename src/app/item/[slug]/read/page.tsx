@@ -509,7 +509,7 @@ export default function ReadPage() {
               maxWidth: widthMap[maxWidth],
               fontSize: `${fontSize}px`,
               lineHeight: `${lineHeight}`,
-              fontFamily: 'Georgia, "Times New Roman", Times, serif',
+              fontFamily: 'var(--font-reader), Georgia, "Times New Roman", Times, serif',
               textAlign: 'justify',
               hyphens: 'none',
               WebkitHyphens: 'none',
