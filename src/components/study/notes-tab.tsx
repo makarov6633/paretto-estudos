@@ -23,7 +23,6 @@ type NotesTabProps = {
 
 export function NotesTab({ itemId }: NotesTabProps) {
   const [notes, setNotes] = useState<UserNote[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newNoteContent, setNewNoteContent] = useState("");
@@ -36,8 +35,6 @@ export function NotesTab({ itemId }: NotesTabProps) {
       setNotes(data.notes || []);
     } catch (error) {
       console.error("Error fetching notes:", error);
-    } finally {
-      setLoading(false);
     }
   }, [itemId]);
 
@@ -131,14 +128,6 @@ export function NotesTab({ itemId }: NotesTabProps) {
       minute: "2-digit",
     });
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Carregando notas...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">

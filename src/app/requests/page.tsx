@@ -101,7 +101,7 @@ export default function RequestsPage() {
           stats={[
             {
               label: "Resposta",
-              value: "3 a 5 dias",
+              value: "24 horas",
               helper: "Retorno por email ou na plataforma",
             },
             {
@@ -128,14 +128,8 @@ export default function RequestsPage() {
               </CardHeader>
             </Card>
           ) : (
-            <div className="space-y-6">
-              {loading ? (
-                <Card className="surface-card border-border bg-[color:var(--overlay-card)] backdrop-blur-xl">
-                  <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                    Carregando pedidos...
-                  </CardContent>
-                </Card>
-              ) : existing ? (
+            <div className="space-y-6" style={{ opacity: loading ? 0.7 : 1, transition: 'opacity 0.3s' }}>
+              {existing ? (
                 <Card className="surface-card border-border bg-[color:var(--overlay-card)] backdrop-blur-xl">
                   <CardHeader>
                     <CardTitle className="text-base text-foreground">Pedido pendente</CardTitle>
