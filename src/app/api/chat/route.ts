@@ -3,6 +3,8 @@ import { streamText, UIMessage, convertToModelMessages } from "ai";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { verifyCsrf } from "@/lib/security";
+import { validateChatMessage, checkUserRateLimit } from "@/lib/input-sanitization";
+import { checkUserAccess } from "@/lib/access-control";
 
 export async function POST(req: Request) {
   // CSRF protection
@@ -14,6 +16,36 @@ export async function POST(req: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
+  }
+
+  // Check access control (premium/free)
+  const access = await checkUserAccess(session.user.id);
+  if (!access.allowed) {
+    return new Response(
+      JSON.stringify({
+        error: 'Access denied',
+        reason: access.reason,
+        remainingFree: access.remainingFree,
+      }),
+      { 
+        status: access.reason === 'limit' ? 402 : 403,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+
+  // Rate limiting per user (100 messages per minute)
+  if (!checkUserRateLimit(session.user.id, 100, 60000)) {
+    return new Response(
+      JSON.stringify({
+        error: 'Rate limit exceeded',
+        message: 'Too many messages. Please wait a moment.',
+      }),
+      { 
+        status: 429,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 
   // Validate payload size
@@ -29,9 +61,34 @@ export async function POST(req: Request) {
       return new Response("Invalid messages", { status: 400 });
     }
 
+    // Validar e sanitizar cada mensagem
+    const sanitizedMessages: UIMessage[] = [];
+    for (const msg of messages) {
+      if (msg.role === 'user' && typeof msg.content === 'string') {
+        const validation = validateChatMessage(msg.content);
+        
+        if (!validation.isValid) {
+          return new Response(
+            JSON.stringify({ error: validation.error }),
+            { 
+              status: 400,
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+        }
+        
+        sanitizedMessages.push({
+          ...msg,
+          content: validation.sanitized || msg.content,
+        });
+      } else {
+        sanitizedMessages.push(msg);
+      }
+    }
+
     const result = streamText({
       model: openai(process.env.OPENAI_MODEL || "gpt-4o-mini"),
-      messages: convertToModelMessages(messages),
+      messages: convertToModelMessages(sanitizedMessages),
     });
 
     return (

@@ -17,6 +17,7 @@ import {
 } from "drizzle-orm";
 import { computeEtag } from "@/lib/http";
 import { getUserIdFromRequest, checkUserAccess } from "@/lib/access-control";
+import { validateSearchQuery, validateLimit, validateOffset, isValidSlug } from "@/lib/input-sanitization";
 
 // Pequena correção baseada em padrão para títulos específicos
 function fixTitle(title: string): string {
@@ -39,12 +40,40 @@ function fixTitle(title: string): string {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const q = searchParams.get("q")?.trim();
-    const slug = searchParams.get("slug")?.trim();
+    
+    // Validar e sanitizar inputs
+    const qParam = searchParams.get("q");
+    let q: string | undefined;
+    if (qParam) {
+      const validation = validateSearchQuery(qParam);
+      if (!validation.isValid) {
+        return NextResponse.json(
+          { error: validation.error },
+          { status: 400 }
+        );
+      }
+      q = validation.value;
+    }
+    
+    const slugParam = searchParams.get("slug")?.trim();
+    let slug: string | undefined;
+    if (slugParam) {
+      if (!isValidSlug(slugParam)) {
+        return NextResponse.json(
+          { error: 'Invalid slug format' },
+          { status: 400 }
+        );
+      }
+      slug = slugParam;
+    }
+    
     const hasPdf = searchParams.get("hasPdf");
     const tag = searchParams.get("tag");
-    const limit = Number(searchParams.get("limit") ?? 1000);
-    const page = Number(searchParams.get("page") ?? 1);
+    
+    const limitValidation = validateLimit(searchParams.get("limit") ?? 1000, 1000);
+    const limit = limitValidation.value;
+    
+    const page = Math.max(1, Number(searchParams.get("page") ?? 1));
     const offset = (page - 1) * limit;
     const expand = searchParams.get("expand");
     const sort = searchParams.get("sort");
