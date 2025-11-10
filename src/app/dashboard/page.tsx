@@ -7,12 +7,14 @@ import {
   BookOpen,
   Trophy,
   Flame,
-  TrendingUp,
   Award,
   Clock,
-  BarChart3,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DashboardCharts } from "@/components/DashboardCharts";
+import { ItemCard } from "@/components/ItemCard";
+import type { Item } from "@/types";
+import { Sparkles } from "lucide-react";
 
 interface DashboardData {
   gamification: {
@@ -43,6 +45,7 @@ interface DashboardData {
     date: string;
     minutes: number;
   }>;
+  recommendedItems: Item[];
 }
 
 export default function DashboardPage() {
@@ -81,8 +84,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const maxStudy = Math.max(...data.studyByDay.map((d) => d.minutes), 1);
 
   return (
     <main className="page-shell">
@@ -138,68 +139,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-5 h-5" />
-              <h2 className="text-lg font-semibold">Últimos 7 dias</h2>
-            </div>
-            <div className="flex items-end justify-between gap-2 h-48">
-              {data.studyByDay.map((day, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                  <div className="flex-1 w-full flex items-end">
-                    <div
-                      className="w-full bg-primary rounded-t"
-                      style={{
-                        height: `${(day.minutes / maxStudy) * 100}%`,
-                        minHeight: day.minutes > 0 ? "8px" : "0px",
-                      }}
-                      title={`${day.minutes} min`}
-                    />
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(day.date).toLocaleDateString("pt-BR", {
-                      weekday: "short",
-                    })}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <BarChart3 className="w-5 h-5" />
-              <h2 className="text-lg font-semibold">Categorias mais lidas</h2>
-            </div>
-            <div className="space-y-3">
-              {data.categoriesRead.slice(0, 5).map((cat, i) => (
-                <div key={i}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{cat.category}</span>
-                    <span className="text-muted-foreground">{cat.count}</span>
-                  </div>
-                  <div className="w-full bg-secondary/20 rounded-full h-2">
-                    <div
-                      className="bg-primary h-2 rounded-full"
-                      style={{
-                        width: `${(cat.count / data.categoriesRead[0].count) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-              {data.categoriesRead.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Nenhum resumo lido ainda
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        <DashboardCharts
+          studyByDay={data.studyByDay}
+          categoriesRead={data.categoriesRead}
+          weeklyGoal={180}
+        />
 
         {data.recentBadges.length > 0 && (
-          <div className="bg-card border border-border rounded-lg p-6">
+          <div className="bg-card border border-border rounded-lg p-6 mb-8">
             <div className="flex items-center gap-2 mb-4">
               <Award className="w-5 h-5" />
               <h2 className="text-lg font-semibold">Conquistas Recentes</h2>
@@ -219,6 +166,20 @@ export default function DashboardPage() {
                     {badge.rarity}
                   </Badge>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.recommendedItems && data.recommendedItems.length > 0 && (
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-semibold">Recomendados para Você</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {data.recommendedItems.map((item) => (
+                <ItemCard key={item.id} item={item} />
               ))}
             </div>
           </div>

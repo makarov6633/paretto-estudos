@@ -113,6 +113,31 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    const recommendedItems = await db
+      .select({
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        author: item.author,
+        coverImageUrl: item.coverImageUrl,
+        readingMinutes: item.readingMinutes,
+        tags: item.tags,
+      })
+      .from(item)
+      .where(
+        sql`EXISTS (
+          SELECT 1 FROM jsonb_array_elements_text(${item.tags}) AS tag
+          WHERE tag IN (
+            SELECT up.tag FROM user_preference up 
+            WHERE up."userId" = ${userId} 
+            ORDER BY up.weight DESC 
+            LIMIT 5
+          )
+        )`
+      )
+      .orderBy(desc(item.createdAt))
+      .limit(4);
+
     return NextResponse.json({
       gamification,
       recentBadges,
@@ -122,6 +147,7 @@ export async function GET(request: NextRequest) {
         count: Number(c.count),
       })),
       studyByDay,
+      recommendedItems,
     });
   } catch (error) {
     console.error("Error fetching dashboard data:", error);

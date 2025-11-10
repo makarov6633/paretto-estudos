@@ -9,6 +9,7 @@ import { useSession } from "@/lib/auth-client";
 import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
 import { FloatingStudyTools } from "@/components/study/floating-study-tools";
+import { SimilarItems } from "@/components/SimilarItems";
 
 type FullItem = Item & {
   sections?: Array<{ 
@@ -23,26 +24,28 @@ function removeIncorrectHyphens(html: string): string {
   
   let processed = html;
   
-  // Remove soft hyphens (caracteres invisíveis de quebra)
-  processed = processed.replace(/\u00AD/g, ''); // Soft hyphen (&#173;)
+  // Remove soft hyphens e caracteres invisíveis
+  processed = processed.replace(/\u00AD/g, ''); // Soft hyphen
   processed = processed.replace(/&shy;/gi, ''); // HTML entity
+  processed = processed.replace(/\u200B/g, ''); // Zero-width space
+  processed = processed.replace(/\uFEFF/g, ''); // Zero-width no-break space
   
-  // Remove hifenização incorreta no final de tags/linhas
-  // Padrão: "palavra-</p><p>palavra" ou "palavra- palavra"
-  processed = processed
-    // Remove hífen antes de tag de fechamento seguido de abertura
-    .replace(/(\w+)-\s*<\/([^>]+)>\s*<([^>]+)>\s*(\w+)/g, '$1$4')
-    // Remove hífen seguido de espaço(s) e outra palavra
-    .replace(/(\w+)-\s+(\w+)/g, '$1$2')
-    // Remove hífen seguido de quebra de linha e palavra
-    .replace(/(\w+)-\s*\n\s*(\w+)/g, '$1$2')
-    // Remove hífen antes de <br> e depois palavra
-    .replace(/(\w+)-\s*<br\s*\/?>\s*(\w+)/gi, '$1$2')
-    // Remove hífen antes de <p> e depois palavra  
-    .replace(/(\w+)-\s*<\/p>\s*<p[^>]*>\s*(\w+)/gi, '$1$4');
+  // Remove espaços antes de pontuação
+  processed = processed.replace(/\s+([.,;:!?])/g, '$1');
+  
+  // Corrige espaços em palavras quebradas (F unção -> Função)
+  processed = processed.replace(/([A-ZÀ-Ú])\s+([a-zà-ú]{4,})/g, '$1$2');
+  
+  // Remove hifenização incorreta entre tags
+  processed = processed.replace(/(\w+)-\s*<\/([^>]+)>\s*<([^>]+)>\s*(\w+)/g, '$1$4');
+  processed = processed.replace(/(\w+)-\s*<br\s*\/?>\s*(\w+)/gi, '$1$2');
+  processed = processed.replace(/(\w+)-\s+(\w+)/g, '$1$2');
+  processed = processed.replace(/(\w+)-\n\s*(\w+)/g, '$1$2');
   
   // Normaliza espaçamentos múltiplos
   processed = processed.replace(/\s{2,}/g, ' ');
+  processed = processed.replace(/\s+</g, '<');
+  processed = processed.replace(/>\s+/g, '>');
   
   return processed;
 }
@@ -79,10 +82,10 @@ async function fetchItem(slug: string): Promise<FullItem | null> {
 }
 
 const readerPrefsSchema = z.object({
-  fontSize: z.number().min(12).max(32).optional(),
-  lineHeight: z.number().min(1.0).max(2.4).optional(),
+  fontSize: z.number().min(10).max(64).optional(),
+  lineHeight: z.number().min(1.0).max(3.0).optional(),
   maxWidth: z.enum(['narrow', 'medium', 'wide', 'full']).optional(),
-  theme: z.enum(['light', 'sepia', 'dark']).optional(),
+  theme: z.enum(['light', 'sepia', 'dark', 'high-contrast']).optional(),
 });
 
 export default function ReadPage() {
@@ -91,7 +94,8 @@ export default function ReadPage() {
   const [fontSize, setFontSize] = useState(16);
   const [lineHeight, setLineHeight] = useState(1.5);
   const [maxWidth, setMaxWidth] = useState<'narrow' | 'medium' | 'wide' | 'full'>('medium');
-  const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'sepia' | 'dark' | 'high-contrast'>('dark');
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
@@ -142,6 +146,20 @@ export default function ReadPage() {
             itemId: item.id,
             scrollProgress: Math.round(scrollProgress),
             currentSectionIndex: currentSection,
+          }),
+        });
+
+        await fetch('/api/telemetry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'reading_progress',
+            props: {
+              itemId: item.id,
+              scrollProgress: Math.round(scrollProgress),
+              sectionIndex: currentSection,
+              sectionTitle: sections[currentSection]?.heading,
+            },
           }),
         });
       } catch (error) {
@@ -221,6 +239,9 @@ export default function ReadPage() {
             setShowSettings(prev => !prev);
           }
           break;
+        case '?':
+          setShowShortcuts(prev => !prev);
+          break;
         case 'ArrowLeft':
           if (!showToc && !showSettings) {
             navigateToSection('prev');
@@ -235,14 +256,14 @@ export default function ReadPage() {
         case '=':
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            setFontSize(prev => Math.min(32, prev + 2));
+            setFontSize(prev => Math.min(64, prev + 2));
           }
           break;
         case '-':
         case '_':
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            setFontSize(prev => Math.max(14, prev - 2));
+            setFontSize(prev => Math.max(10, prev - 2));
           }
           break;
       }
@@ -250,7 +271,7 @@ export default function ReadPage() {
     
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [navigateToSection, showToc, showSettings]);
+  }, [navigateToSection, showToc, showSettings, showShortcuts]);
 
   // Track scroll progress
   useEffect(() => {
@@ -304,6 +325,11 @@ export default function ReadPage() {
       bg: '#1a1a1a',
       text: '#e8e6e3',
       secondary: '#a8a29e',
+    },
+    'high-contrast': {
+      bg: '#000000',
+      text: '#ffffff',
+      secondary: '#ffff00',
     },
   };
 
@@ -439,7 +465,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    onClick={() => setFontSize(Math.max(10, fontSize - 2))}
                     className="h-9 px-3"
                   >
                     A-
@@ -448,7 +474,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                    onClick={() => setFontSize(Math.min(64, fontSize + 2))}
                     className="h-9 px-3"
                   >
                     A+
@@ -472,7 +498,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setLineHeight(Math.min(2.4, lineHeight + 0.1))}
+                    onClick={() => setLineHeight(Math.min(3.0, lineHeight + 0.1))}
                     className="h-9 px-3"
                   >
                     +
@@ -501,14 +527,14 @@ export default function ReadPage() {
               </div>
 
               {/* Theme */}
-              <div>
+              <div className="sm:col-span-2 lg:col-span-1">
                 <label className="text-xs font-medium opacity-70 block mb-2">Tema</label>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <Button
                     size="sm"
                     variant={theme === 'light' ? 'default' : 'outline'}
                     onClick={() => setTheme('light')}
-                    className="h-9 px-3 flex-1"
+                    className="h-9 px-3"
                   >
                     Claro
                   </Button>
@@ -516,7 +542,7 @@ export default function ReadPage() {
                     size="sm"
                     variant={theme === 'sepia' ? 'default' : 'outline'}
                     onClick={() => setTheme('sepia')}
-                    className="h-9 px-3 flex-1"
+                    className="h-9 px-3"
                   >
                     Sépia
                   </Button>
@@ -524,9 +550,18 @@ export default function ReadPage() {
                     size="sm"
                     variant={theme === 'dark' ? 'default' : 'outline'}
                     onClick={() => setTheme('dark')}
-                    className="h-9 px-3 flex-1"
+                    className="h-9 px-3"
                   >
                     Escuro
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={theme === 'high-contrast' ? 'default' : 'outline'}
+                    onClick={() => setTheme('high-contrast')}
+                    className="h-9 px-3"
+                    title="Alto contraste para acessibilidade"
+                  >
+                    A11y
                   </Button>
                 </div>
               </div>
@@ -620,9 +655,21 @@ export default function ReadPage() {
                     </h2>
                   )}
                   <div
-                    className="prose prose-lg max-w-none"
-                    style={{ color: currentTheme.text }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.contentHtml || '') }}
+                    className="prose prose-lg max-w-none reader-content"
+                    style={{ 
+                      color: currentTheme.text,
+                      WebkitFontSmoothing: 'antialiased',
+                      MozOsxFontSmoothing: 'grayscale',
+                      textRendering: 'optimizeLegibility',
+                    }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: DOMPurify.sanitize(section.contentHtml || '', {
+                        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'a', 'span', 'div', 'table', 'thead', 'tbody', 'tr', 'td', 'th'],
+                        ALLOWED_ATTR: ['href', 'class', 'id', 'style'],
+                        KEEP_CONTENT: true,
+                        ALLOW_DATA_ATTR: false,
+                      })
+                    }}
                   />
                 </section>
               ))
@@ -634,9 +681,10 @@ export default function ReadPage() {
               </div>
             )}
           </article>
+        </main>
 
-
-      </main>
+        {/* Similar Items Section */}
+        <SimilarItems itemId={item.id} />
 
       {/* Floating Study Tools */}
       {item && (
@@ -646,7 +694,84 @@ export default function ReadPage() {
         />
       )}
 
+      {/* Keyboard Shortcuts */}
+      {showShortcuts && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Atalhos de Teclado</h2>
+              <button
+                onClick={() => setShowShortcuts(false)}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Fechar"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm">Abrir/fechar índice</span>
+                <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">T</kbd>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm">Configurações</span>
+                <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">S</kbd>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm">Seção anterior/próxima</span>
+                <div className="flex gap-1">
+                  <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">←</kbd>
+                  <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">→</kbd>
+                </div>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm">Aumentar/diminuir fonte</span>
+                <div className="flex gap-1">
+                  <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">Ctrl +</kbd>
+                  <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">Ctrl -</kbd>
+                </div>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm">Fechar painéis</span>
+                <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">Esc</kbd>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-sm">Mostrar atalhos</span>
+                <kbd className="px-2 py-1 text-xs font-mono bg-secondary border border-border rounded">?</kbd>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Custom Styles */}
+      <style jsx global>{`
+        .reader-content {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
+          font-feature-settings: "kern" 1, "liga" 1;
+        }
+        
+        .reader-content p {
+          margin-bottom: 1em;
+          text-align: justify;
+          hyphens: none;
+          -webkit-hyphens: none;
+          -moz-hyphens: none;
+          word-spacing: 0.05em;
+          letter-spacing: 0.01em;
+        }
+        
+        .reader-content strong {
+          font-weight: 600;
+        }
+        
+        .reader-content em {
+          font-style: italic;
+        }
+      `}</style>
       <style jsx global>{`
         .prose p {
           margin-bottom: 1em;
