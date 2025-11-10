@@ -44,7 +44,7 @@ export default function ReadPage() {
   const [fontSize, setFontSize] = useState(16);
   const [lineHeight, setLineHeight] = useState(1.5);
   const [maxWidth, setMaxWidth] = useState<'narrow' | 'medium' | 'wide' | 'full'>('medium');
-  const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('sepia');
+  const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('dark');
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
@@ -265,7 +265,7 @@ export default function ReadPage() {
               </a>
               
               {/* Navigation Buttons */}
-              {sections.length > 1 && !showPdf && (
+              {sections.length > 1 && (
                 <div className="hidden md:flex items-center gap-1 ml-2">
                   <Button
                     size="sm"
@@ -448,7 +448,7 @@ export default function ReadPage() {
       {/* Table of Contents Sidebar */}
       {showToc && (
         <div 
-          className="fixed inset-y-0 left-0 z-30 w-80 border-r shadow-2xl overflow-y-auto"
+          className="fixed inset-y-0 left-0 z-30 w-60 sm:w-80 border-r shadow-2xl overflow-y-auto"
           style={{
             backgroundColor: currentTheme.bg,
             borderRightColor: `${currentTheme.secondary}33`,

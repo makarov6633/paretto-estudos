@@ -142,3 +142,87 @@ export const subscription = pgTable(
     userUnique: uniqueIndex("subscription_user_unique").on(table.userId),
   }),
 );
+
+// --- Study Features: Checklists, Quizzes, Notes ---
+
+export const checklist = pgTable("checklist", {
+  id: text("id").primaryKey(),
+  itemId: text("itemId")
+    .notNull()
+    .references(() => item.id, { onDelete: "cascade" }),
+  orderIndex: integer("orderIndex").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export const userChecklistProgress = pgTable("user_checklist_progress", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  checklistId: text("checklistId")
+    .notNull()
+    .references(() => checklist.id, { onDelete: "cascade" }),
+  completed: boolean("completed").notNull().default(false),
+  completedAt: timestamp("completedAt"),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export const quizQuestion = pgTable("quiz_question", {
+  id: text("id").primaryKey(),
+  itemId: text("itemId")
+    .notNull()
+    .references(() => item.id, { onDelete: "cascade" }),
+  orderIndex: integer("orderIndex").notNull(),
+  question: text("question").notNull(),
+  options: jsonb("options").notNull(), // Array of strings
+  correctAnswer: integer("correctAnswer").notNull(), // Index of correct option
+  explanation: text("explanation"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export const quizAnswer = pgTable("quiz_answer", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  questionId: text("questionId")
+    .notNull()
+    .references(() => quizQuestion.id, { onDelete: "cascade" }),
+  selectedAnswer: integer("selectedAnswer").notNull(),
+  isCorrect: boolean("isCorrect").notNull(),
+  attemptedAt: timestamp("attemptedAt").notNull().defaultNow(),
+});
+
+export const userNote = pgTable("user_note", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  itemId: text("itemId")
+    .notNull()
+    .references(() => item.id, { onDelete: "cascade" }),
+  sectionId: text("sectionId").references(() => summarySection.id, {
+    onDelete: "set null",
+  }),
+  content: text("content").notNull(),
+  isStructured: boolean("isStructured").notNull().default(false),
+  tags: jsonb("tags"), // Array of strings for categorization
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export const studySession = pgTable("study_session", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  itemId: text("itemId")
+    .notNull()
+    .references(() => item.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'reading' | 'quiz' | 'notes' | 'checklist'
+  duration: integer("duration"), // in seconds
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
