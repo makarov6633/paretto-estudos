@@ -44,3 +44,18 @@ export interface TelemetryEvent {
   ts: string; // ISO
   props?: Record<string, unknown>;
 }
+
+export interface ReadingProgress {
+  userId: ID;
+  itemId: ID;
+  scrollProgress: number;
+  currentSectionIndex: number;
+  lastReadAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface ContinueReadingItem extends Item {
+  scrollProgress: number;
+  currentSectionIndex: number;
+  lastReadAt: Date | string;
+}

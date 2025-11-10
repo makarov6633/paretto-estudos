@@ -9,6 +9,10 @@ import {
   ilike,
   desc,
   asc,
+  or,
+  gte,
+  lte,
+  sql,
   type SQLWrapper,
 } from "drizzle-orm";
 import { computeEtag } from "@/lib/http";
@@ -122,12 +126,30 @@ export async function GET(req: Request) {
       );
     }
     if (q) {
-      // match on title (and optionally author if schema supports)
-      whereClauses.push(ilike(item.title, `%${q}%`));
+      const searchCondition = or(
+        ilike(item.title, `%${q}%`),
+        ilike(item.author, `%${q}%`)
+      );
+      if (searchCondition) {
+        whereClauses.push(searchCondition);
+      }
     }
     if (hasPdf === "1") whereClauses.push(eq(item.hasPdf, true));
-    // Filtro por tag: como tags Ã© jsonb, usamos um fallback simples no tÃ­tulo
-    if (tag) whereClauses.push(ilike(item.title, `%${tag}%`));
+    
+    if (tag) {
+      whereClauses.push(
+        sql`${item.tags}::jsonb @> ${JSON.stringify([tag])}::jsonb`
+      );
+    }
+    
+    const minMinutes = searchParams.get("minMinutes");
+    const maxMinutes = searchParams.get("maxMinutes");
+    if (minMinutes) {
+      whereClauses.push(gte(item.readingMinutes, parseInt(minMinutes, 10)));
+    }
+    if (maxMinutes) {
+      whereClauses.push(lte(item.readingMinutes, parseInt(maxMinutes, 10)));
+    }
 
     const where = whereClauses.length ? and(...whereClauses) : undefined;
 

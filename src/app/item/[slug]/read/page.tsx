@@ -96,13 +96,62 @@ export default function ReadPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [progressRestored, setProgressRestored] = useState(false);
 
-  useSession();
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (!slug) return;
     fetchItem(slug as string).then((it) => setItem(it));
   }, [slug]);
+
+  useEffect(() => {
+    if (!item?.id || !session?.user?.id || progressRestored) return;
+
+    const restoreProgress = async () => {
+      try {
+        const response = await fetch(`/api/progress?itemId=${encodeURIComponent(item.id)}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.scrollProgress > 0) {
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const targetScroll = (data.scrollProgress / 100) * docHeight;
+            window.scrollTo({ top: targetScroll, behavior: 'instant' });
+            setCurrentSection(data.currentSectionIndex || 0);
+          }
+          setProgressRestored(true);
+        }
+      } catch (error) {
+        console.error('Failed to restore reading progress:', error);
+        setProgressRestored(true);
+      }
+    };
+
+    restoreProgress();
+  }, [item, session, progressRestored]);
+
+  useEffect(() => {
+    if (!item?.id || !session?.user?.id || !progressRestored) return;
+
+    const saveProgress = async () => {
+      try {
+        await fetch('/api/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            itemId: item.id,
+            scrollProgress: Math.round(scrollProgress),
+            currentSectionIndex: currentSection,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to save reading progress:', error);
+      }
+    };
+
+    const timeoutId = setTimeout(saveProgress, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [item, session, scrollProgress, currentSection, progressRestored]);
 
   useEffect(() => {
     const saved = localStorage.getItem('reader-preferences');
