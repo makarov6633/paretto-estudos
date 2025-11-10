@@ -7,16 +7,22 @@ export type AccessResult = {
   allowed: boolean;
   reason: 'premium' | 'free' | 'limit' | 'unauthorized';
   remainingFree?: number;
+  isPremium?: boolean;
 };
 
 /**
  * Check if user has access to content
  * Centralized access control logic
+ * 
+ * REGRAS:
+ * - Premium: acesso ilimitado
+ * - Free: 5 itens por mês calendario
+ * - Não autenticado: sem acesso
  */
 export async function checkUserAccess(userId: string | null, itemId?: string): Promise<AccessResult> {
   if (!userId) {
-    await logAudit(null, 'access.denied', { reason: 'unauthorized' });
-    return { allowed: false, reason: 'unauthorized' };
+    await logAudit(null, 'access.denied', { reason: 'unauthorized', itemId });
+    return { allowed: false, reason: 'unauthorized', isPremium: false };
   }
 
   // Check premium subscription
@@ -38,10 +44,11 @@ export async function checkUserAccess(userId: string | null, itemId?: string): P
       (!sub.currentPeriodEnd || sub.currentPeriodEnd > now)
     ) {
       await logAudit(userId, 'access.granted', { reason: 'premium', itemId });
-      return { allowed: true, reason: 'premium' };
+      return { allowed: true, reason: 'premium', isPremium: true };
     }
-  } catch {
-    // If subscription check fails, fall through to free tier
+  } catch (error) {
+    console.error('Failed to check subscription:', error);
+    // Fall through to free tier
   }
 
   // Free tier: 5 items per calendar month
@@ -66,15 +73,46 @@ export async function checkUserAccess(userId: string | null, itemId?: string): P
 
     if (used >= 5) {
       await logAudit(userId, 'access.denied', { reason: 'limit', used, itemId });
-      return { allowed: false, reason: 'limit', remainingFree: 0 };
+      return { allowed: false, reason: 'limit', remainingFree: 0, isPremium: false };
     }
 
     await logAudit(userId, 'access.granted', { reason: 'free', remaining, itemId });
-    return { allowed: true, reason: 'free', remainingFree: remaining };
-  } catch {
-    // If counting fails, be permissive but log the error
-    console.error('Failed to check free tier usage');
-    return { allowed: true, reason: 'free' };
+    return { allowed: true, reason: 'free', remainingFree: remaining, isPremium: false };
+  } catch (error) {
+    console.error('Failed to check free tier usage:', error);
+    // Em caso de erro, NEGAR acesso (fail closed)
+    await logAudit(userId, 'access.denied', { reason: 'limit', error: String(error), itemId });
+    return { allowed: false, reason: 'limit', remainingFree: 0, isPremium: false };
+  }
+}
+
+/**
+ * Verifica se usuário é premium
+ * Usado para features exclusivas premium
+ */
+export async function isPremiumUser(userId: string | null): Promise<boolean> {
+  if (!userId) return false;
+  
+  try {
+    const now = new Date();
+    const subs = await db
+      .select({
+        status: subscription.status,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+      })
+      .from(subscription)
+      .where(eq(subscription.userId, userId))
+      .limit(1);
+
+    const sub = subs[0];
+    return !!(
+      sub &&
+      sub.status === 'active' &&
+      (!sub.currentPeriodEnd || sub.currentPeriodEnd > now)
+    );
+  } catch (error) {
+    console.error('Failed to check premium status:', error);
+    return false;
   }
 }
 

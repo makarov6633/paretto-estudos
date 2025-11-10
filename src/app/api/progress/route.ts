@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { readingProgress } from "@/lib/schema";
 import { auth } from "@/lib/auth";
 import { eq, and } from "drizzle-orm";
+import { isValidUUID } from "@/lib/input-sanitization";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +18,14 @@ export async function GET(request: NextRequest) {
     if (!itemId) {
       return NextResponse.json(
         { error: "itemId is required" },
+        { status: 400 }
+      );
+    }
+    
+    // Validar UUID
+    if (!isValidUUID(itemId)) {
+      return NextResponse.json(
+        { error: "Invalid itemId format" },
         { status: 400 }
       );
     }
@@ -63,6 +72,31 @@ export async function POST(request: NextRequest) {
     if (!itemId || scrollProgress === undefined) {
       return NextResponse.json(
         { error: "itemId and scrollProgress are required" },
+        { status: 400 }
+      );
+    }
+    
+    // Validar UUID
+    if (!isValidUUID(itemId)) {
+      return NextResponse.json(
+        { error: "Invalid itemId format" },
+        { status: 400 }
+      );
+    }
+    
+    // Validar scrollProgress (0-100)
+    if (typeof scrollProgress !== 'number' || scrollProgress < 0 || scrollProgress > 100) {
+      return NextResponse.json(
+        { error: "scrollProgress must be between 0 and 100" },
+        { status: 400 }
+      );
+    }
+    
+    // Validar currentSectionIndex
+    if (currentSectionIndex !== undefined && 
+        (typeof currentSectionIndex !== 'number' || currentSectionIndex < 0)) {
+      return NextResponse.json(
+        { error: "Invalid currentSectionIndex" },
         { status: 400 }
       );
     }

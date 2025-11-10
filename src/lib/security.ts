@@ -68,22 +68,29 @@ function base64url(buf: Buffer): string {
 
 /**
  * Obtém o JWT secret validado.
- * Em produção, exige que a variável esteja configurada.
- * Em desenvolvimento, permite fallback para "dev-secret-only-for-local".
+ * SEMPRE exige que a variável esteja configurada (sem fallback).
  * 
- * @throws Error se JWT_SECRET não estiver definido em produção
+ * @throws Error se JWT_SECRET não estiver definido
  */
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
-  const isProd = process.env.NODE_ENV === "production";
   
-  if (!secret && isProd) {
+  if (!secret) {
     throw new Error(
-      "JWT_SECRET environment variable must be set in production"
+      "JWT_SECRET environment variable is required. " +
+      "Generate one with: openssl rand -base64 32"
     );
   }
   
-  return secret || "dev-secret-only-for-local";
+  // Validar tamanho mínimo (256 bits = 32 bytes = 44 chars base64)
+  if (secret.length < 44) {
+    throw new Error(
+      "JWT_SECRET must be at least 32 bytes (44 base64 characters). " +
+      "Current length: " + secret.length
+    );
+  }
+  
+  return secret;
 }
 
 /**
