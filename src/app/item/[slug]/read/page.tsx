@@ -10,7 +10,6 @@ import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
 
 type FullItem = Item & {
-  pdfUrl?: string | null;
   sections?: Array<{ 
     orderIndex: number; 
     heading?: string | null; 
@@ -42,12 +41,10 @@ async function fetchItem(slug: string): Promise<FullItem | null> {
 export default function ReadPage() {
   const { slug } = useParams<{ slug: string }>();
   const [item, setItem] = useState<FullItem | null>(null);
-  const [fontSize, setFontSize] = useState(18);
-  const [lineHeight, setLineHeight] = useState(1.6);
+  const [fontSize, setFontSize] = useState(16);
+  const [lineHeight, setLineHeight] = useState(1.5);
   const [maxWidth, setMaxWidth] = useState<'narrow' | 'medium' | 'wide' | 'full'>('medium');
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('sepia');
-  const [showPdf, setShowPdf] = useState(false);
-  const [pdfScale, setPdfScale] = useState(1.0);
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
@@ -55,8 +52,8 @@ export default function ReadPage() {
   const { data: session } = useSession();
 
   const readerPrefsSchema = z.object({
-    fontSize: z.number().min(14).max(32).optional(),
-    lineHeight: z.number().min(1.2).max(2.4).optional(),
+    fontSize: z.number().min(12).max(32).optional(),
+    lineHeight: z.number().min(1.0).max(2.4).optional(),
     maxWidth: z.enum(['narrow', 'medium', 'wide', 'full']).optional(),
     theme: z.enum(['light', 'sepia', 'dark']).optional(),
   });
@@ -308,17 +305,6 @@ export default function ReadPage() {
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
-              {item.pdfUrl && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setShowPdf(!showPdf)}
-                  className="h-9 px-2 sm:px-3"
-                  aria-label={showPdf ? 'Ver texto' : 'Ver PDF'}
-                >
-                  <BookOpen className="w-4 h-4" />
-                </Button>
-              )}
               <Button
                 size="sm"
                 variant="ghost"
@@ -363,7 +349,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setFontSize(Math.max(14, fontSize - 2))}
+                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
                     className="h-9 px-3"
                   >
                     A-
@@ -387,7 +373,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setLineHeight(Math.max(1.2, lineHeight - 0.2))}
+                    onClick={() => setLineHeight(Math.max(1.0, lineHeight - 0.1))}
                     className="h-9 px-3"
                   >
                     -
@@ -396,7 +382,7 @@ export default function ReadPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setLineHeight(Math.min(2.4, lineHeight + 0.2))}
+                    onClick={() => setLineHeight(Math.min(2.4, lineHeight + 0.1))}
                     className="h-9 px-3"
                   >
                     +
@@ -513,45 +499,14 @@ export default function ReadPage() {
 
       {/* Main Content */}
       <main className="flex-1 pb-20">
-        {showPdf && item.pdfUrl ? (
-          <div className="container mx-auto px-4 py-8">
-            <div className="mb-4 flex items-center justify-center gap-3">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setPdfScale(Math.max(0.5, pdfScale - 0.1))}
-              >
-                Zoom -
-              </Button>
-              <span className="text-sm font-medium">{Math.round(pdfScale * 100)}%</span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setPdfScale(Math.min(2.0, pdfScale + 0.1))}
-              >
-                Zoom +
-              </Button>
-            </div>
-            <div className="flex justify-center">
-              <iframe
-                src={item.pdfUrl}
-                className="border rounded-lg shadow-lg"
-                style={{
-                  width: `${100 * pdfScale}%`,
-                  height: `${800 * pdfScale}px`,
-                  maxWidth: '100%',
-                }}
-                title={`PDF: ${item.title}`}
-              />
-            </div>
-          </div>
-        ) : (
-          <article 
+        <article 
             className="mx-auto px-4 sm:px-6 py-8 sm:py-12"
             style={{ 
               maxWidth: widthMap[maxWidth],
               fontSize: `${fontSize}px`,
               lineHeight,
+              fontFamily: 'Georgia, "Times New Roman", Times, serif',
+              textAlign: 'justify',
             }}
           >
             {sections.length > 0 ? (
@@ -584,13 +539,17 @@ export default function ReadPage() {
               </div>
             )}
           </article>
-        )}
       </main>
 
       {/* Custom Styles */}
       <style jsx global>{`
         .prose p {
-          margin-bottom: 1.25em;
+          margin-bottom: 1em;
+          text-indent: 1.25cm;
+          text-align: justify;
+        }
+        .prose p:first-of-type {
+          text-indent: 0;
         }
         .prose blockquote {
           border-left: 4px solid ${currentTheme.secondary};
