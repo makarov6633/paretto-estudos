@@ -34,7 +34,9 @@
     "lint:css:fix": "stylelint --fix \"src/**/*.css\"",
     "remove:item": "node scripts/remove-item.mjs",
     "deploy:check": "node scripts/pre-deployment-check.mjs",
-    "security:migrate-media": "node scripts/migrate-media-to-private.mjs"
+    "security:migrate-media": "node scripts/migrate-media-to-private.mjs",
+    "test:apis": "node scripts/verify-api-communication.mjs",
+    "test:endpoints": "node scripts/test-api-endpoints.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.9",
