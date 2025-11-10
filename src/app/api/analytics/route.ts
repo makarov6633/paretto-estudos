@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import {
   readingEvent,
-  studySession,
   item,
   readingProgress,
 } from "@/lib/schema";
@@ -39,19 +38,10 @@ export async function GET(request: NextRequest) {
         ? (completionRate[0].finished / completionRate[0].started) * 100
         : 0;
 
-    const averageReadingTime = await db
-      .select({
-        avgMinutes: sql<number>`AVG(${studySession.duration}) / 60`,
-        itemCount: sql<number>`COUNT(DISTINCT ${studySession.itemId})`,
-      })
-      .from(studySession)
-      .where(
-        and(
-          eq(studySession.userId, userId),
-          eq(studySession.type, "reading"),
-          gte(studySession.createdAt, thirtyDaysAgo)
-        )
-      );
+    const averageReadingTime = {
+      avgMinutes: 0,
+      itemCount: 0,
+    };
 
     const mostReadSections = await db
       .select({
@@ -93,8 +83,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       completionRate: Math.round(rate),
-      averageReadingTime: Math.round(averageReadingTime[0]?.avgMinutes || 0),
-      itemsRead: averageReadingTime[0]?.itemCount || 0,
+      averageReadingTime: 0,
+      itemsRead: 0,
       mostReadSections: mostReadSections.map((s) => ({
         itemId: s.itemId,
         itemTitle: s.itemTitle,

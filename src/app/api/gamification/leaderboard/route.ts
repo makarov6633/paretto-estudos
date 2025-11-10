@@ -26,7 +26,6 @@ export async function GET(request: Request) {
         currentStreak: userGamification.currentStreak,
         longestStreak: userGamification.longestStreak,
         level: userGamification.level,
-        quizzesCompleted: userGamification.quizzesCompleted,
         itemsRead: userGamification.itemsRead,
       })
       .from(userGamification)

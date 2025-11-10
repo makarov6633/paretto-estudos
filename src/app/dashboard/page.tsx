@@ -22,9 +22,6 @@ interface DashboardData {
     currentStreak: number;
     longestStreak: number;
     level: number;
-    quizzesCompleted: number;
-    checklistsCompleted: number;
-    notesCreated: number;
     itemsRead: number;
   };
   recentBadges: Array<{
