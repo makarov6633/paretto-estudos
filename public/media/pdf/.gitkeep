@@ -1,0 +1,2 @@
+# This directory stores PDF files for the library items
+# PDFs are served via /api/item/pdf route

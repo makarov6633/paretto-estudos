@@ -48,6 +48,7 @@ export default function ReadPage() {
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('sepia');
   const [showPdf, setShowPdf] = useState(false);
   const [pdfScale, setPdfScale] = useState(1.0);
+  const [pdfError, setPdfError] = useState(false);
   const [showToc, setShowToc] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
@@ -312,11 +313,18 @@ export default function ReadPage() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => setShowPdf(!showPdf)}
+                  onClick={() => {
+                    setShowPdf(!showPdf);
+                    setPdfError(false);
+                  }}
                   className="h-9 px-2 sm:px-3"
                   aria-label={showPdf ? 'Ver texto' : 'Ver PDF'}
+                  title={showPdf ? 'Visualizar como texto' : 'Visualizar PDF original'}
                 >
                   <BookOpen className="w-4 h-4" />
+                  <span className="hidden lg:inline ml-1.5 text-xs">
+                    {showPdf ? 'Texto' : 'PDF'}
+                  </span>
                 </Button>
               )}
               <Button
@@ -533,16 +541,36 @@ export default function ReadPage() {
               </Button>
             </div>
             <div className="flex justify-center">
-              <iframe
-                src={item.pdfUrl}
-                className="border rounded-lg shadow-lg"
-                style={{
-                  width: `${100 * pdfScale}%`,
-                  height: `${800 * pdfScale}px`,
-                  maxWidth: '100%',
-                }}
-                title={`PDF: ${item.title}`}
-              />
+              {pdfError ? (
+                <div className="text-center py-20">
+                  <p className="text-lg font-medium mb-4">PDF não disponível</p>
+                  <p className="text-sm opacity-70 mb-6">O arquivo PDF não pôde ser carregado.</p>
+                  <Button
+                    onClick={() => {
+                      setShowPdf(false);
+                      setPdfError(false);
+                    }}
+                    variant="outline"
+                  >
+                    Ver texto do resumo
+                  </Button>
+                </div>
+              ) : (
+                <iframe
+                  src={item.pdfUrl}
+                  className="border rounded-lg shadow-lg"
+                  style={{
+                    width: `${100 * pdfScale}%`,
+                    height: `${800 * pdfScale}px`,
+                    maxWidth: '100%',
+                  }}
+                  title={`PDF: ${item.title}`}
+                  onError={() => {
+                    console.error('Failed to load PDF:', item.pdfUrl);
+                    setPdfError(true);
+                  }}
+                />
+              )}
             </div>
           </div>
         ) : (

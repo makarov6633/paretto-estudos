@@ -1,0 +1,7 @@
+# Ignore all PDF files (too large for Git)
+*.pdf
+
+# Keep this directory structure
+!.gitignore
+!README.md
+!.gitkeep
