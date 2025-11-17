@@ -6,7 +6,7 @@ import type { Item } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Type, BookOpen } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeReaderHtml } from "@/lib/sanitize";
 import { z } from "zod";
 import { SimilarItems } from "@/components/SimilarItems";
 
@@ -696,12 +696,7 @@ export default function ReadPage() {
                       textRendering: 'optimizeLegibility',
                     }}
                     dangerouslySetInnerHTML={{ 
-                      __html: DOMPurify.sanitize(section.contentHtml || '', {
-                        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'a', 'span', 'div', 'table', 'thead', 'tbody', 'tr', 'td', 'th'],
-                        ALLOWED_ATTR: ['href', 'class', 'id', 'style'],
-                        KEEP_CONTENT: true,
-                        ALLOW_DATA_ATTR: false,
-                      })
+                      __html: sanitizeReaderHtml(section.contentHtml || '')
                     }}
                   />
                 </section>

@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "@/lib/schema";
 import { z } from "zod";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeAdminHtml } from "@/lib/sanitize";
 
 const sectionSchema = z.object({
   id: z.string().optional(),
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
                 itemId: id,
                 orderIndex: s.orderIndex,
                 heading: s.heading,
-                contentHtml: s.contentHtml ? DOMPurify.sanitize(s.contentHtml) : undefined,
+                contentHtml: s.contentHtml ? sanitizeAdminHtml(s.contentHtml) : undefined,
               })),
             );
           }
