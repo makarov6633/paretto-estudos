@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { subscription } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
+import { isEventProcessed, markEventProcessed } from "@/lib/stripe-webhook";
+import { logger } from "@/lib/logger";
 
 function getPeriodEnd(sub: Stripe.Subscription): Date | null {
   const s = sub as unknown as {
@@ -23,34 +25,49 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const sig = req.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  
   if (!sig || !secret) {
-  return NextResponse.json({ error: 'missing signature or secret' }, { status: 400 });
-}
+    logger.warn({ sig: !!sig, secret: !!secret }, 'Missing Stripe signature or secret');
+    return NextResponse.json({ error: 'missing signature or secret' }, { status: 400 });
+  }
   const stripe = getStripe();
   const raw = await req.text();
   let event: Stripe.Event;
+  
   try {
     event = stripe.webhooks.constructEvent(raw, sig, secret);
-  } catch {
+    logger.info({ eventId: event.id, eventType: event.type }, 'Stripe webhook received');
+  } catch (err) {
+    logger.error({ err }, 'Invalid Stripe webhook signature');
     return NextResponse.json({ error: "invalid signature" }, { status: 400 });
+  }
+  
+  // Idempotency check: skip if already processed
+  if (await isEventProcessed(event.id)) {
+    logger.info({ eventId: event.id }, 'Webhook event already processed (idempotent)');
+    return NextResponse.json({ received: true, idempotent: true });
   }
 
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId =
-        (session.metadata?.userId as string | undefined) ?? undefined;
-      const subId = (session.subscription as string | undefined) ?? undefined;
+      const userId = session.metadata?.userId as string | undefined;
+      const subId = session.subscription as string | undefined;
+      
+      if (!userId) {
+        logger.warn({ eventId: event.id, sessionId: session.id }, 'checkout.session.completed without userId');
+        // Skip this event if no userId
+      } else {
+      
       let status = "active";
       let currentPeriodEnd: Date | null = null;
+      
       if (subId) {
-        const sub = await (stripe.subscriptions.retrieve(
-          subId,
-        ) as Promise<Stripe.Subscription>);
+        const sub = await stripe.subscriptions.retrieve(subId) as Stripe.Subscription;
         status = sub.status as string;
         currentPeriodEnd = getPeriodEnd(sub);
       }
-      if (userId) {
+        logger.info({ userId, subId, status }, 'Creating/updating subscription from checkout');
         await db
           .insert(subscription)
           .values({
@@ -100,16 +117,22 @@ export async function POST(req: Request) {
           .where(eq(subscription.stripeSubscriptionId, subId as string));
       } catch {}
     }
-  } catch (e) {
-    console.error("Stripe webhook processing error:", e);
-    // Log to monitoring service in production (e.g., Sentry)
-    // Still return 200 to Stripe to prevent retries for unrecoverable errors
+    
+    // Mark as processed after successful handling
+    await markEventProcessed(event.id, event.type, event.data.object);
+    
+  } catch (err) {
+    logger.error({ err, eventId: event.id, eventType: event.type }, 'Stripe webhook processing error');
+    
+    // Still return 200 to Stripe to prevent infinite retries
+    // Monitoring/alerting should catch these errors
     return NextResponse.json(
       { received: true, error: "Processing error logged" },
       { status: 200 }
     );
   }
 
+  logger.info({ eventId: event.id, eventType: event.type }, 'Stripe webhook processed successfully');
   return NextResponse.json({ received: true });
 }
 

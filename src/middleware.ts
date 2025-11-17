@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { RATE_LIMITS } from "@/lib/constants";
+import { checkUserAccess } from "@/lib/access-control";
+import { logger } from "@/lib/logger";
 
 // Simple in-memory rate limiter (best effort per instance)
 const WINDOW_MS = 60_000; // 1 minute
@@ -20,8 +22,10 @@ function allow(key: string, limit: number) {
   return { ok: true, remaining: limit - curr.count, reset: curr.reset };
 }
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  const origin = req.headers.get('origin');
+  const referer = req.headers.get('referer');
 
   // Skip static assets & Next internals
   if (
@@ -75,6 +79,10 @@ export function middleware(req: NextRequest) {
 
   const { ok, remaining, reset } = allow(key, limit);
   if (!ok) {
+    logger.warn(
+      { ip, path, group, limit },
+      'Rate limit exceeded'
+    );
     return new NextResponse("Too Many Requests", {
       status: 429,
       headers: {
@@ -83,6 +91,71 @@ export function middleware(req: NextRequest) {
       },
     });
   }
+  
+  // CSRF Protection: validate origin/referer for state-changing requests
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const isValidOrigin = origin && origin.startsWith(appUrl);
+    const isValidReferer = referer && referer.startsWith(appUrl);
+    
+    // Allow if no origin/referer (same-origin request) or if valid
+    if (origin && !isValidOrigin && !isValidReferer) {
+      logger.warn(
+        { ip, path, origin, referer, method: req.method },
+        'CSRF check failed: invalid origin/referer'
+      );
+      return new NextResponse('Forbidden', { status: 403 });
+    }
+  }
+  
+  // Premium route protection
+  const premiumPaths = ['/dashboard', '/profile', '/leaderboard'];
+  const isPremiumPath = premiumPaths.some(p => path.startsWith(p));
+  
+  if (isPremiumPath) {
+    try {
+      // Extract userId from session cookie
+      const cookie = req.headers.get('cookie') || '';
+      const sessionMatch = cookie.match(/paretto[._]session[._]token=([^;]+)/);
+      
+      if (!sessionMatch) {
+        logger.info({ path, ip }, 'Unauthenticated access to premium route');
+        return NextResponse.redirect(new URL('/library', req.url));
+      }
+      
+      // Get session from auth API
+      const sessionRes = await fetch(`${req.nextUrl.origin}/api/auth/get-session`, {
+        headers: { cookie: req.headers.get('cookie') || '' },
+        cache: 'no-store',
+      });
+      
+      if (!sessionRes.ok) {
+        return NextResponse.redirect(new URL('/library', req.url));
+      }
+      
+      const session = await sessionRes.json();
+      const userId = session?.user?.id;
+      
+      if (!userId) {
+        return NextResponse.redirect(new URL('/library', req.url));
+      }
+      
+      // Check subscription access
+      const access = await checkUserAccess(userId);
+      
+      if (!access.allowed && access.reason === 'limit') {
+        logger.info(
+          { userId, path, reason: access.reason },
+          'Free tier limit reached on premium route'
+        );
+        return NextResponse.redirect(new URL('/plans', req.url));
+      }
+    } catch (err) {
+      logger.error({ err, path }, 'Error checking premium route access');
+      // Fail open for now (don't block legitimate users on errors)
+    }
+  }
+  
   return NextResponse.next();
 }
 

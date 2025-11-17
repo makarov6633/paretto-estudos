@@ -33,17 +33,20 @@ const nextConfig: NextConfig = {
             const base = [
               "default-src 'self'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' data: blob: https://lh3.googleusercontent.com https://*.googleusercontent.com https://storage.googleapis.com https://images.unsplash.com",
+              "img-src 'self' data: blob: https://lh3.googleusercontent.com https://*.googleusercontent.com https://storage.googleapis.com https://images.unsplash.com https://*.stripe.com",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https:",
+              "connect-src 'self' https: https://api.stripe.com",
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+              "object-src 'none'",
+              "base-uri 'self'",
               process.env.NODE_ENV === "production"
                 ? "frame-ancestors 'none'"
                 : "frame-ancestors 'self'",
             ];
             const script =
               process.env.NODE_ENV === "production"
-                ? "script-src 'self'"
-                : "script-src 'self' 'unsafe-inline' 'unsafe-eval'"; // dev convenience
+                ? "script-src 'self' https://js.stripe.com"
+                : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com"; // dev convenience
             const value = [script, ...base].join("; ");
             return { key: "Content-Security-Policy", value };
           })(),
