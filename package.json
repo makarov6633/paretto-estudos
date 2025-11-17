@@ -50,6 +50,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.4",
     "isomorphic-dompurify": "^2.31.0",
+    "jsdom": "27.2.0",
     "lucide-react": "^0.539.0",
     "nanoid": "^5.1.6",
     "next": "15.5.4",
@@ -82,7 +83,6 @@
     "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "jsdom": "^25.0.1",
     "shadcn": "^3.0.0",
     "stylelint": "^16",
     "tailwindcss": "^4",
@@ -97,6 +97,9 @@
     }
   },
   "pnpm": {
+    "overrides": {
+      "jsdom": "27.2.0"
+    },
     "peerDependencyRules": {
       "allowedVersions": {
         "zod-to-json-schema>zod": "^3.24.1 || ^4"
