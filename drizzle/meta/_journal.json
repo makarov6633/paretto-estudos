@@ -36,6 +36,13 @@
       "when": 1731266400000,
       "tag": "0008_remove_study_systems",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1763370666763,
+      "tag": "0009_abandoned_boom_boom",
+      "breakpoints": true
     }
   ]
 }
