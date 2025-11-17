@@ -206,3 +206,11 @@ export const readingProgress = pgTable(
     pk: primaryKey({ columns: [table.userId, table.itemId] }),
   })
 );
+
+// Stripe webhook event tracking for idempotency
+export const webhookEvent = pgTable("webhook_event", {
+  id: text("id").primaryKey(), // Stripe event.id
+  type: text("type").notNull(), // event.type
+  processedAt: timestamp("processedAt").notNull().defaultNow(),
+  data: jsonb("data"), // Optional: store event data for debugging
+});
