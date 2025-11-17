@@ -9,7 +9,7 @@ import DOMPurify from "isomorphic-dompurify";
  * - Remove tags perigosas (script, iframe, style, form)
  * - Remove atributos de evento (onclick, onerror, etc)
  */
-const DEFAULT_CONFIG: DOMPurify.Config & Record<string, unknown> = {
+const DEFAULT_CONFIG: Record<string, unknown> = {
   ALLOWED_TAGS: [
     'p', 'br', 'strong', 'em', 'u', 
     'ul', 'ol', 'li', 
@@ -44,14 +44,14 @@ const DEFAULT_CONFIG: DOMPurify.Config & Record<string, unknown> = {
  */
 export function sanitizeHtml(
   dirty: string, 
-  config?: DOMPurify.Config & Record<string, unknown>
+  config?: Record<string, unknown>
 ): string {
   if (!dirty) return '';
   
   return DOMPurify.sanitize(dirty, { 
     ...DEFAULT_CONFIG, 
     ...config 
-  });
+  }) as string;
 }
 
 /**
@@ -79,7 +79,7 @@ export function sanitizeAdminHtml(dirty: string): string {
       'style', 'script', 'iframe', 'form', 
       'input', 'button', 'object', 'embed'
     ],
-  });
+  }) as string;
 }
 
 /**
@@ -104,5 +104,5 @@ export function sanitizeReaderHtml(dirty: string): string {
       ...DEFAULT_CONFIG.ALLOWED_ATTR as string[],
     ],
     KEEP_CONTENT: true,
-  });
+  }) as string;
 }
